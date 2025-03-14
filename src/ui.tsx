@@ -392,7 +392,7 @@ function Plugin() {
                       
                       {results.circularInstances && results.circularInstances.length > 0 ? (
                         <Fragment>
-                          <VerticalSpace space="extraSmall" />
+                          <VerticalSpace space="small" />
                           <Text style={{ fontSize: '12px', color: 'var(--figma-color-text-secondary)' }}>
                             Components were skipped because they:
                           </Text>
@@ -437,9 +437,12 @@ function Plugin() {
                           )}
                         </Fragment>
                       ) : (
-                        <Text style={{ fontSize: '12px', color: 'var(--figma-color-text-secondary)' }}>
-                          Components were skipped because they already had the selected theme.
-                        </Text>
+                        <Fragment>
+                          <VerticalSpace space="small" />
+                          <Text style={{ fontSize: '12px', color: 'var(--figma-color-text-secondary)' }}>
+                            Components were skipped because they already had the selected theme.
+                          </Text>
+                        </Fragment>
                       )}
                     </div>
                   </div>

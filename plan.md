@@ -10,7 +10,7 @@
 - ✅ For detailed status show numbers of checked layers
 - ✅ Performance improvement: Only check layers when Apply button is pressed, show real-time progress
 - ✅ Remove "Selected: N" text from UI
-- No ui version, with Figma native actions:
+- No ui version, with Figma native actions. Use notifications for feedback.
     - Dark Theme. Apply to all instances
     - Light Theme. Apply to all instances
 
