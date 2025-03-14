@@ -4,7 +4,8 @@
 - Ignore if instance already had desired theme. Show in the results skipped.
 - Don't show 0 with succes messages.
 - Don't use colored background for messages. Find another UI for it.
-- Instances with Theme property found.
+- Instances with Theme property found
+- Detailed loading state for long running operations - when select or apply to big file. 
 
 ## Description
 This plugin allows users to quickly set a theme for all component instances within a selection. The plugin provides a segmented control interface where users can select a theme, and upon confirmation, the plugin will update the "Theme" property for all component instances found within the selection.
