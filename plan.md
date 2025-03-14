@@ -2,6 +2,8 @@
 
 ## TODO
 - Ignore if instance already had desired theme. Show in the results skipped.
+- Don't show 0 with succes messages.
+- Don't use colored background for messages. Find another UI for it.
 - Instances with Theme property found.
 
 ## Description
