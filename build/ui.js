@@ -662,10 +662,10 @@
     }
   });
 
-  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/0a69341f-5a79-49cd-b486-e136cf1d0795/loading-indicator.module.js
+  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/e94dc58c-f2e0-4977-b28d-3b82424185e6/loading-indicator.module.js
   var loading_indicator_module_default;
   var init_loading_indicator_module = __esm({
-    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/0a69341f-5a79-49cd-b486-e136cf1d0795/loading-indicator.module.js"() {
+    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/e94dc58c-f2e0-4977-b28d-3b82424185e6/loading-indicator.module.js"() {
       if (document.getElementById("bb46d434d2") === null) {
         const element = document.createElement("style");
         element.id = "bb46d434d2";
@@ -726,10 +726,10 @@
     }
   });
 
-  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/7bbd0095-f8df-4fe0-ae39-6cf1fc90d628/button.module.js
+  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/2bc07262-d2ab-4c25-a6ef-d35d62163076/button.module.js
   var button_module_default;
   var init_button_module = __esm({
-    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/7bbd0095-f8df-4fe0-ae39-6cf1fc90d628/button.module.js"() {
+    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/2bc07262-d2ab-4c25-a6ef-d35d62163076/button.module.js"() {
       if (document.getElementById("01d33c4800") === null) {
         const element = document.createElement("style");
         element.id = "01d33c4800";
@@ -928,10 +928,10 @@
     }
   });
 
-  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/9b94ca19-d5be-477f-bbcf-fde33683c254/divider.module.js
+  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/b74ffb5f-e07c-4d5e-a484-49a4836ca15c/divider.module.js
   var divider_module_default;
   var init_divider_module = __esm({
-    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/9b94ca19-d5be-477f-bbcf-fde33683c254/divider.module.js"() {
+    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/b74ffb5f-e07c-4d5e-a484-49a4836ca15c/divider.module.js"() {
       if (document.getElementById("b099eed128") === null) {
         const element = document.createElement("style");
         element.id = "b099eed128";
@@ -969,10 +969,10 @@
     }
   });
 
-  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/6948738d-d5bc-448d-a84f-20a4f0770ec3/text.module.js
+  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/f0f0c8f7-4810-4dda-b805-866d48d404f5/text.module.js
   var text_module_default;
   var init_text_module = __esm({
-    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/6948738d-d5bc-448d-a84f-20a4f0770ec3/text.module.js"() {
+    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/f0f0c8f7-4810-4dda-b805-866d48d404f5/text.module.js"() {
       if (document.getElementById("22ae0d5c55") === null) {
         const element = document.createElement("style");
         element.id = "22ae0d5c55";
@@ -1030,10 +1030,10 @@
     }
   });
 
-  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/cd9bd1c2-62b3-4209-a7d5-02c47c9ecd4a/segmented-control.module.js
+  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/3d9ee632-26f0-43b8-9005-908bfe76b1d5/segmented-control.module.js
   var segmented_control_module_default;
   var init_segmented_control_module = __esm({
-    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/cd9bd1c2-62b3-4209-a7d5-02c47c9ecd4a/segmented-control.module.js"() {
+    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/3d9ee632-26f0-43b8-9005-908bfe76b1d5/segmented-control.module.js"() {
       if (document.getElementById("1306f0b4f6") === null) {
         const element = document.createElement("style");
         element.id = "1306f0b4f6";
@@ -1193,10 +1193,10 @@
     }
   });
 
-  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/02d75761-0dc2-4f9e-be2c-b61963ee143f/container.module.js
+  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/d7e54579-b075-44de-952b-def121c9f03e/container.module.js
   var container_module_default;
   var init_container_module = __esm({
-    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/02d75761-0dc2-4f9e-be2c-b61963ee143f/container.module.js"() {
+    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/d7e54579-b075-44de-952b-def121c9f03e/container.module.js"() {
       if (document.getElementById("b3e40d2787") === null) {
         const element = document.createElement("style");
         element.id = "b3e40d2787";
@@ -1237,10 +1237,10 @@
     }
   });
 
-  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/4eb2f5fe-2098-4f30-a139-38336d0b70d7/vertical-space.module.js
+  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/27c03768-25fe-46d9-8e82-c04ce076145d/vertical-space.module.js
   var vertical_space_module_default;
   var init_vertical_space_module = __esm({
-    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/4eb2f5fe-2098-4f30-a139-38336d0b70d7/vertical-space.module.js"() {
+    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/27c03768-25fe-46d9-8e82-c04ce076145d/vertical-space.module.js"() {
       if (document.getElementById("0edf028f88") === null) {
         const element = document.createElement("style");
         element.id = "0edf028f88";
@@ -1281,9 +1281,9 @@
     }
   });
 
-  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/d2c93d26-16b9-461c-a3e4-c5e92aa85446/base.js
+  // ../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/df62bf63-3ad6-40e7-936a-a47d8b511783/base.js
   var init_base = __esm({
-    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/d2c93d26-16b9-461c-a3e4-c5e92aa85446/base.js"() {
+    "../../../../private/var/folders/2j/0wddr5mn7c76chg83p1p6n580000gp/T/df62bf63-3ad6-40e7-936a-a47d8b511783/base.js"() {
       if (document.getElementById("f5164c8699") === null) {
         const element = document.createElement("style");
         element.id = "f5164c8699";
@@ -1583,7 +1583,7 @@ svg {
       backgroundColor: "var(--figma-color-bg-brand)",
       borderRadius: "3px",
       transition: "width 0.2s ease-in-out"
-    } })), /* @__PURE__ */ _(Text, { style: { fontSize: "12px", color: "var(--figma-color-text-secondary)" } }, "Processed ", progress.checked, " of ", progress.total, " layers (", progress.percent, "%)"), progress.instances > 0 && /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(VerticalSpace, { space: "extraSmall" }), /* @__PURE__ */ _(Text, { style: { fontSize: "12px", color: "var(--figma-color-text-secondary)" } }, "Found ", progress.instances, " components with Theme property")), progress.updated > 0 && /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(VerticalSpace, { space: "extraSmall" }), /* @__PURE__ */ _(Text, { style: { fontSize: "12px", color: "var(--figma-color-text-success)" } }, "Updated: ", progress.updated)), progress.skipped > 0 && /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(VerticalSpace, { space: "extraSmall" }), /* @__PURE__ */ _(Text, { style: { fontSize: "12px", color: "var(--figma-color-text-warning)" } }, "Skipped: ", progress.skipped), /* @__PURE__ */ _(VerticalSpace, { space: "extraSmall" }))), /* @__PURE__ */ _(LoadingIndicator, null)) : errorMessage ? /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(Text, null, errorMessage), /* @__PURE__ */ _(VerticalSpace, { space: "medium" }), /* @__PURE__ */ _(Button, { fullWidth: true, onClick: handleSelectionChange }, "Refresh Selection")) : /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(Text, null, "Select theme to apply:"), /* @__PURE__ */ _(VerticalSpace, { space: "small" }), segmentOptions.length > 0 && segmentOptions[0].value !== "no-themes" ? /* @__PURE__ */ _(
+    } })), /* @__PURE__ */ _(Text, { style: { fontSize: "12px", color: "var(--figma-color-text-secondary)" } }, "Processed ", progress.checked, " of ", progress.total, " layers (", progress.percent, "%)"), progress.instances > 0 && /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(VerticalSpace, { space: "extraSmall" }), /* @__PURE__ */ _(Text, { style: { fontSize: "12px", color: "var(--figma-color-text-secondary)" } }, "Found ", progress.instances, " components with Theme property")), progress.updated > 0 && /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(VerticalSpace, { space: "extraSmall" }), /* @__PURE__ */ _(Text, { style: { fontSize: "12px", color: "var(--figma-color-text-success)" } }, "Applied: ", progress.updated)), progress.updated === 0 && progress.checked > 0 && /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(VerticalSpace, { space: "extraSmall" }), /* @__PURE__ */ _(Text, { style: { fontSize: "12px", color: "var(--figma-color-text-secondary)" } }, "Keep going! No components applied yet."), /* @__PURE__ */ _(VerticalSpace, { space: "extraSmall" }))), /* @__PURE__ */ _(LoadingIndicator, null)) : errorMessage ? /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(Text, null, errorMessage), /* @__PURE__ */ _(VerticalSpace, { space: "medium" }), /* @__PURE__ */ _(Button, { fullWidth: true, onClick: handleSelectionChange }, "Refresh Selection")) : /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(Text, null, "Select theme to apply:"), /* @__PURE__ */ _(VerticalSpace, { space: "small" }), segmentOptions.length > 0 && segmentOptions[0].value !== "no-themes" ? /* @__PURE__ */ _(
       SegmentedControl,
       {
         onChange: handleSegmentChange,
@@ -1598,22 +1598,9 @@ svg {
         disabled: !theme || theme === "no-themes" || selectionCount === 0
       },
       "Apply Theme"
-    ), showResults && results && /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(VerticalSpace, { space: "medium" }), /* @__PURE__ */ _(Divider, null), /* @__PURE__ */ _(VerticalSpace, { space: "medium" }), /* @__PURE__ */ _(Text, { style: { fontWeight: "bold" } }, "Results for theme: ", results.theme), /* @__PURE__ */ _(VerticalSpace, { space: "extraSmall" }), /* @__PURE__ */ _(Text, { style: { fontSize: "12px", color: "var(--figma-color-text-secondary)" } }, "Checked ", results.checkedLayersCount, " layers in total"), /* @__PURE__ */ _(VerticalSpace, { space: "small" }), results.updatedCount > 0 && /* @__PURE__ */ _("div", { style: {
+    ), showResults && results && /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(VerticalSpace, { space: "medium" }), /* @__PURE__ */ _(Divider, null), /* @__PURE__ */ _(VerticalSpace, { space: "medium" }), results.updatedCount > 0 && /* @__PURE__ */ _("div", { style: {
       display: "flex",
       alignItems: "center",
-      marginBottom: "8px"
-    } }, /* @__PURE__ */ _("div", { style: {
-      width: "16px",
-      height: "16px",
-      borderRadius: "50%",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      marginRight: "8px",
-      color: "var(--figma-color-icon-success)"
-    } }, "\u2713"), /* @__PURE__ */ _(Text, null, "Updated: ", results.updatedCount, " component", results.updatedCount !== 1 ? "s" : "")), results.skippedCount > 0 && /* @__PURE__ */ _(k, null, /* @__PURE__ */ _("div", { style: {
-      display: "flex",
-      alignItems: "flex-start",
       marginBottom: "8px"
     } }, /* @__PURE__ */ _("div", { style: {
       width: "16px",
@@ -1622,27 +1609,20 @@ svg {
       alignItems: "center",
       justifyContent: "center",
       marginRight: "8px",
-      color: "var(--figma-color-icon-warning)"
-    } }, "!"), /* @__PURE__ */ _("div", null, /* @__PURE__ */ _(Text, null, "Skipped: ", results.skippedCount, " component", results.skippedCount !== 1 ? "s" : ""), results.circularInstances && results.circularInstances.length > 0 ? /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(VerticalSpace, { space: "small" }), /* @__PURE__ */ _(Text, { style: { fontSize: "12px", color: "var(--figma-color-text-secondary)" } }, "Components were skipped because they:"), /* @__PURE__ */ _("ul", { style: {
-      margin: "4px 0 0 16px",
-      padding: 0,
-      fontSize: "12px",
-      color: "var(--figma-color-text-secondary)"
-    } }, /* @__PURE__ */ _("li", null, "Already had the selected theme"), /* @__PURE__ */ _("li", null, "Had circular references")), results.circularInstances.length > 0 && /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(Text, { style: {
-      fontSize: "12px",
-      marginTop: "8px",
-      color: "var(--figma-color-text-secondary)"
-    } }, "Components with circular references:"), /* @__PURE__ */ _("div", { style: {
-      maxHeight: "100px",
-      overflowY: "auto",
-      fontSize: "12px",
-      marginTop: "4px",
-      paddingLeft: "8px",
-      borderLeft: "1px solid var(--figma-color-border)"
-    } }, results.circularInstances.map((instance) => /* @__PURE__ */ _("div", { key: instance.id, style: {
-      marginBottom: "4px",
-      padding: "2px"
-    } }, instance.name))))) : /* @__PURE__ */ _(k, null, /* @__PURE__ */ _(VerticalSpace, { space: "small" }), /* @__PURE__ */ _(Text, { style: { fontSize: "12px", color: "var(--figma-color-text-secondary)" } }, "Components were skipped because they already had the selected theme."))))), results.updatedCount === 0 && results.skippedCount === 0 && /* @__PURE__ */ _("div", { style: {
+      color: "var(--figma-color-icon-success)"
+    } }, "\u2713"), /* @__PURE__ */ _(Text, null, "Applied: ", results.updatedCount, " component", results.updatedCount !== 1 ? "s" : "")), results.updatedCount === 0 && /* @__PURE__ */ _("div", { style: {
+      display: "flex",
+      alignItems: "center",
+      marginBottom: "8px"
+    } }, /* @__PURE__ */ _("div", { style: {
+      width: "16px",
+      height: "16px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: "8px",
+      color: "var(--figma-color-icon-brand)"
+    } }, "\u2728"), /* @__PURE__ */ _(Text, null, "Everything looks good! No changes were needed.")), results.updatedCount === 0 && results.skippedCount === 0 && /* @__PURE__ */ _("div", { style: {
       display: "flex",
       alignItems: "center"
     } }, /* @__PURE__ */ _("div", { style: {
@@ -1653,15 +1633,7 @@ svg {
       justifyContent: "center",
       marginRight: "8px",
       color: "var(--figma-color-icon)"
-    } }, "i"), /* @__PURE__ */ _(Text, null, "No components were updated or skipped.")), /* @__PURE__ */ _(VerticalSpace, { space: "medium" }), /* @__PURE__ */ _(
-      Button,
-      {
-        secondary: true,
-        fullWidth: true,
-        onClick: () => setShowResults(false)
-      },
-      "Clear Results"
-    ))), /* @__PURE__ */ _(VerticalSpace, { space: "small" }));
+    } }, "\u2728"), /* @__PURE__ */ _(Text, null, "All set! Your components are already perfect.")), /* @__PURE__ */ _(VerticalSpace, { space: "medium" }), /* @__PURE__ */ _(Text, { style: { fontSize: "12px", color: "var(--figma-color-text-secondary)" } }, "Checked ", results.checkedLayersCount, " layers in total"))), /* @__PURE__ */ _(VerticalSpace, { space: "small" }));
   }
   var ui_default;
   var init_ui = __esm({

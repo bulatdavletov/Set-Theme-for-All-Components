@@ -10,6 +10,7 @@
 - ✅ For detailed status show numbers of checked layers
 - ✅ Performance improvement: Only check layers when Apply button is pressed, show real-time progress
 - ✅ Remove "Selected: N" text from UI
+- ✅ Don't show skipped count. Show Applied count. If zero, tell something nice
 - No ui version, with Figma native actions. Use notifications for feedback.
     - Dark Theme. Apply to all instances
     - Light Theme. Apply to all instances
@@ -160,6 +161,17 @@ The plugin has been successfully implemented and debugged. All core functionalit
   - Tracks the total number of layers checked during theme detection and application
   - Displays the count in both the main UI and results screen
   - Provides users with insight into how many layers were processed
+- UI improvements for better user experience:
+  - Changed "Updated" to "Applied" for clearer terminology
+  - Removed the "Skipped" count display to focus on positive outcomes
+  - Added encouraging messages when no components have been applied yet
+  - Added a friendly message when all components are already perfect (zero applied count)
+  - Used more friendly icons (✨) for positive feedback
+  - Completely removed the "Skipped: X components" message and related information from results section
+  - Simplified results view by removing "Results for theme: X" heading
+  - Moved "Checked X layers in total" to the bottom of results for better visual hierarchy
+  - Removed the Clear Results button to streamline the interface
+  - Fixed alignment of the checkmark icon in "Applied: X components" message
 
 ## Next Steps
 1. ~~Set up the initial project structure~~ ✅

@@ -275,16 +275,16 @@ function Plugin() {
               <Fragment>
                 <VerticalSpace space="extraSmall" />
                 <Text style={{ fontSize: '12px', color: 'var(--figma-color-text-success)' }}>
-                  Updated: {progress.updated}
+                  Applied: {progress.updated}
                 </Text>
               </Fragment>
             )}
             
-            {progress.skipped > 0 && (
+            {progress.updated === 0 && progress.checked > 0 && (
               <Fragment>
                 <VerticalSpace space="extraSmall" />
-                <Text style={{ fontSize: '12px', color: 'var(--figma-color-text-warning)' }}>
-                  Skipped: {progress.skipped}
+                <Text style={{ fontSize: '12px', color: 'var(--figma-color-text-secondary)' }}>
+                  Keep going! No components applied yet.
                 </Text>
                 <VerticalSpace space="extraSmall" />
               </Fragment>
@@ -336,13 +336,6 @@ function Plugin() {
               <Divider />
               <VerticalSpace space="medium" />
               
-              <Text style={{ fontWeight: 'bold' }}>Results for theme: {results.theme}</Text>
-              <VerticalSpace space="extraSmall" />
-              <Text style={{ fontSize: '12px', color: 'var(--figma-color-text-secondary)' }}>
-                Checked {results.checkedLayersCount} layers in total
-              </Text>
-              <VerticalSpace space="small" />
-              
               {results.updatedCount > 0 && (
                 <div style={{ 
                   display: 'flex',
@@ -351,8 +344,7 @@ function Plugin() {
                 }}>
                   <div style={{ 
                     width: '16px', 
-                    height: '16px', 
-                    borderRadius: '50%',
+                    height: '16px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -362,91 +354,32 @@ function Plugin() {
                     ✓
                   </div>
                   <Text>
-                    Updated: {results.updatedCount} component{results.updatedCount !== 1 ? 's' : ''}
+                    Applied: {results.updatedCount} component{results.updatedCount !== 1 ? 's' : ''}
                   </Text>
                 </div>
               )}
               
-              {results.skippedCount > 0 && (
-                <Fragment>
+              {results.updatedCount === 0 && (
+                <div style={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: '8px'
+                }}>
                   <div style={{ 
+                    width: '16px', 
+                    height: '16px',
                     display: 'flex',
-                    alignItems: 'flex-start',
-                    marginBottom: '8px'
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: '8px',
+                    color: 'var(--figma-color-icon-brand)'
                   }}>
-                    <div style={{ 
-                      width: '16px', 
-                      height: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginRight: '8px',
-                      color: 'var(--figma-color-icon-warning)'
-                    }}>
-                      !
-                    </div>
-                    <div>
-                      <Text>
-                        Skipped: {results.skippedCount} component{results.skippedCount !== 1 ? 's' : ''}
-                      </Text>
-                      
-                      {results.circularInstances && results.circularInstances.length > 0 ? (
-                        <Fragment>
-                          <VerticalSpace space="small" />
-                          <Text style={{ fontSize: '12px', color: 'var(--figma-color-text-secondary)' }}>
-                            Components were skipped because they:
-                          </Text>
-                          <ul style={{ 
-                            margin: '4px 0 0 16px', 
-                            padding: 0, 
-                            fontSize: '12px', 
-                            color: 'var(--figma-color-text-secondary)'
-                          }}>
-                            <li>Already had the selected theme</li>
-                            <li>Had circular references</li>
-                          </ul>
-                          
-                          {results.circularInstances.length > 0 && (
-                            <Fragment>
-                              <Text style={{ 
-                                fontSize: '12px', 
-                                marginTop: '8px', 
-                                color: 'var(--figma-color-text-secondary)'
-                              }}>
-                                Components with circular references:
-                              </Text>
-                              
-                              <div style={{ 
-                                maxHeight: '100px', 
-                                overflowY: 'auto', 
-                                fontSize: '12px',
-                                marginTop: '4px',
-                                paddingLeft: '8px',
-                                borderLeft: '1px solid var(--figma-color-border)'
-                              }}>
-                                {results.circularInstances.map((instance) => (
-                                  <div key={instance.id} style={{ 
-                                    marginBottom: '4px',
-                                    padding: '2px'
-                                  }}>
-                                    {instance.name}
-                                  </div>
-                                ))}
-                              </div>
-                            </Fragment>
-                          )}
-                        </Fragment>
-                      ) : (
-                        <Fragment>
-                          <VerticalSpace space="small" />
-                          <Text style={{ fontSize: '12px', color: 'var(--figma-color-text-secondary)' }}>
-                            Components were skipped because they already had the selected theme.
-                          </Text>
-                        </Fragment>
-                      )}
-                    </div>
+                    ✨
                   </div>
-                </Fragment>
+                  <Text>
+                    Everything looks good! No changes were needed.
+                  </Text>
+                </div>
               )}
               
               {/* Show a message when nothing happened */}
@@ -464,22 +397,18 @@ function Plugin() {
                     marginRight: '8px',
                     color: 'var(--figma-color-icon)'
                   }}>
-                    i
+                    ✨
                   </div>
                   <Text>
-                    No components were updated or skipped.
+                    All set! Your components are already perfect.
                   </Text>
                 </div>
               )}
               
               <VerticalSpace space="medium" />
-              <Button 
-                secondary
-                fullWidth 
-                onClick={() => setShowResults(false)}
-              >
-                Clear Results
-              </Button>
+              <Text style={{ fontSize: '12px', color: 'var(--figma-color-text-secondary)' }}>
+                Checked {results.checkedLayersCount} layers in total
+              </Text>
             </Fragment>
           )}
         </Fragment>
