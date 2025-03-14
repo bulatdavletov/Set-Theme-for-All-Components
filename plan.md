@@ -1,5 +1,9 @@
 # Figma Theme Setter Plugin
 
+## TODO
+- Ignore if instance already had desired theme. Show in the results skipped.
+- Instances with Theme property found.
+
 ## Description
 This plugin allows users to quickly set a theme for all component instances within a selection. The plugin provides a segmented control interface where users can select a theme, and upon confirmation, the plugin will update the "Theme" property for all component instances found within the selection.
 

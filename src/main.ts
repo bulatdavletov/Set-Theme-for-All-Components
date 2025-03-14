@@ -258,6 +258,13 @@ function applyThemeToSelection(theme: string): { updatedCount: number, skippedCo
         if (componentProperties && 'Theme' in componentProperties) {
           const themeProperty = componentProperties['Theme']
           if (themeProperty && themeProperty.type === 'VARIANT') {
+            // Check if the instance already has the desired theme
+            if (themeProperty.value === theme) {
+              console.log('Instance already has the desired theme:', node.name)
+              skippedCount++
+              return
+            }
+            
             // Try to update the theme property
             try {
               console.log('Updating theme for node:', node.name)

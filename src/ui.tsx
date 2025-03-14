@@ -269,36 +269,60 @@ function Plugin() {
                   
                   <div style={{ 
                     padding: '8px', 
-                    backgroundColor: 'var(--figma-color-bg-danger-secondary)',
+                    backgroundColor: 'var(--figma-color-bg-warning-secondary)',
                     borderRadius: '4px',
-                    border: '1px solid var(--figma-color-border-danger)'
+                    border: '1px solid var(--figma-color-border-warning)'
                   }}>
-                    <Text style={{ fontWeight: 'bold', color: 'var(--figma-color-text-danger)' }}>
+                    <Text style={{ fontWeight: 'bold', color: 'var(--figma-color-text-warning)' }}>
                       Skipped: {results.skippedCount} component{results.skippedCount !== 1 ? 's' : ''}
                     </Text>
                     
                     <VerticalSpace space="extraSmall" />
                     
                     {results.circularInstances && results.circularInstances.length > 0 ? (
-                      <div style={{ 
-                        maxHeight: '100px', 
-                        overflowY: 'auto', 
-                        fontSize: '12px',
-                        marginTop: '4px'
-                      }}>
-                        {results.circularInstances.map((instance) => (
-                          <div key={instance.id} style={{ 
-                            marginBottom: '4px',
-                            padding: '2px',
-                            borderBottom: '1px solid var(--figma-color-border-danger-strong)'
-                          }}>
-                            {instance.name}
-                          </div>
-                        ))}
-                      </div>
+                      <Fragment>
+                        <Text style={{ fontSize: '12px', color: 'var(--figma-color-text-warning)' }}>
+                          Some components were skipped because they:
+                        </Text>
+                        <ul style={{ 
+                          margin: '4px 0 0 16px', 
+                          padding: 0, 
+                          fontSize: '12px', 
+                          color: 'var(--figma-color-text-warning)'
+                        }}>
+                          <li>Already had the selected theme</li>
+                          <li>Had circular references</li>
+                        </ul>
+                        
+                        <Text style={{ 
+                          fontSize: '12px', 
+                          fontWeight: 'bold', 
+                          marginTop: '8px', 
+                          color: 'var(--figma-color-text-warning)'
+                        }}>
+                          Components with circular references:
+                        </Text>
+                        
+                        <div style={{ 
+                          maxHeight: '100px', 
+                          overflowY: 'auto', 
+                          fontSize: '12px',
+                          marginTop: '4px'
+                        }}>
+                          {results.circularInstances.map((instance) => (
+                            <div key={instance.id} style={{ 
+                              marginBottom: '4px',
+                              padding: '2px',
+                              borderBottom: '1px solid var(--figma-color-border-warning-strong)'
+                            }}>
+                              {instance.name}
+                            </div>
+                          ))}
+                        </div>
+                      </Fragment>
                     ) : (
-                      <Text style={{ fontSize: '12px', color: 'var(--figma-color-text-danger)' }}>
-                        Components with circular references were detected but not individually identified.
+                      <Text style={{ fontSize: '12px', color: 'var(--figma-color-text-warning)' }}>
+                        Components were skipped because they already had the selected theme.
                       </Text>
                     )}
                   </div>
