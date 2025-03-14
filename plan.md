@@ -1,11 +1,18 @@
 # Figma Theme Setter Plugin
 
 ## TODO
-- Ignore if instance already had desired theme. Show in the results skipped.
-- Don't show 0 with succes messages.
-- Don't use colored background for messages. Find another UI for it.
-- Instances with Theme property found
-- Detailed loading state for long running operations - when select or apply to big file. 
+- ✅ Ignore if instance already had desired theme. Show in the results skipped.
+- ✅ Don't show 0 with succes messages.
+- ✅ Don't use colored background for messages. Find another UI for it.
+- ✅ Instances with Theme property found
+- ✅ Detailed loading state for long running operations - when select or apply to big file. 
+- ✅ Use only hardcoded Light and Dark themes instead of searching for available themes
+- ✅ For detailed status show numbers of checked layers
+- ✅ Performance improvement: Only check layers when Apply button is pressed, show real-time progress
+- ✅ Remove "Selected: N" text from UI
+- No ui version, with Figma native actions:
+    - Dark Theme. Apply to all instances
+    - Light Theme. Apply to all instances
 
 ## Description
 This plugin allows users to quickly set a theme for all component instances within a selection. The plugin provides a segmented control interface where users can select a theme, and upon confirmation, the plugin will update the "Theme" property for all component instances found within the selection.
@@ -18,7 +25,7 @@ This plugin allows users to quickly set a theme for all component instances with
 - Dynamic updates when selection changes ✅
 - Display of instance count in the current selection ✅
 - Minimalist UI with no plugin name or cancel button ✅
-- Simplified text display format ("Selected: N", "Instances found: N") ✅
+- Simplified text display format with only essential information ✅
 - Display list of instances with circular references that cannot be updated ✅
 - Results screen showing successful updates and skipped instances ✅
 
@@ -91,7 +98,7 @@ This plugin allows users to quickly set a theme for all component instances with
 ## Current Status
 The plugin has been successfully implemented and debugged. All core functionality is working as expected:
 - The plugin can detect component instances with a "Theme" property in the selection
-- It provides a segmented control with available theme options (always including Light and Dark)
+- It provides a segmented control with hardcoded theme options (Light and Dark)
 - Users can select and apply a theme to all compatible instances
 - Appropriate feedback is provided to the user
 - Added robust error handling and fallback theme values
@@ -102,6 +109,11 @@ The plugin has been successfully implemented and debugged. All core functionalit
 - Simplified text display format for better readability
 - Display list of instances with circular references that cannot be updated
 - Results screen showing successful updates and skipped instances
+- Skips instances that already have the desired theme and shows them in the results
+- Improved UI for results with cleaner design (no colored backgrounds)
+- Added detailed loading states for long-running operations
+- Uses only hardcoded Light and Dark themes instead of searching for available themes
+- Shows the total number of checked layers in both the main view and results screen
 
 ### Recent Fixes
 - Added comprehensive logging to debug UI and main code execution
@@ -121,23 +133,33 @@ The plugin has been successfully implemented and debugged. All core functionalit
   - Prevent the "Components can't contain instances of themselves" error
   - Display list of instances with circular references in the UI
   - Added results screen showing detailed information after theme application
-- Modified theme detection to always include both Light and Dark themes:
-  - Standard themes (Light and Dark) are always available in the dropdown
-  - Any additional themes detected in the selection are also included
-  - This ensures users always have basic theme options available
+- Simplified theme handling to only use hardcoded Light and Dark themes:
+  - Removed theme detection from component instances
+  - Always use Light and Dark as the only available themes
+  - This simplifies the code and makes the plugin more efficient
 - Added dynamic selection updates:
   - Plugin now listens for selection changes in Figma
-  - Theme list and instance count refresh automatically when selection changes
+  - Instance count refreshes automatically when selection changes
   - Added UI feedback showing how many instances were found in the selection
   - Added a refresh button when no selection is present
 - Simplified the UI:
   - Removed the plugin name heading for a cleaner interface
   - Removed the Cancel button (users can close the plugin using Figma's standard UI)
   - Reduced the plugin height to accommodate the simplified UI
-  - Changed text display to a clearer format ("Selected: N", "Instances found: N")
+  - Changed text display to a clearer format ("Selected: N", "Instances with Theme property: N")
   - Added a section to display instances with circular references that cannot be updated
   - Implemented a results screen that shows successful updates and skipped instances
   - Replaced dropdown with segmented control for more visual theme selection
+  - Improved results display with cleaner design (no colored backgrounds)
+  - Added detailed loading states for long-running operations
+- Added functionality to skip instances that already have the desired theme:
+  - Checks the current theme value before attempting to update
+  - Counts skipped instances in the results
+  - Shows clear information about why instances were skipped
+- Added detailed layer counting:
+  - Tracks the total number of layers checked during theme detection and application
+  - Displays the count in both the main UI and results screen
+  - Provides users with insight into how many layers were processed
 
 ## Next Steps
 1. ~~Set up the initial project structure~~ ✅

@@ -75,19 +75,10 @@ function main_default() {
       });
       return;
     }
-    const { themes: detectedThemes, instanceCount, circularInstances } = findAvailableThemes();
-    console.log("Detected themes:", detectedThemes);
-    console.log("Instance count:", instanceCount);
-    console.log("Circular instances:", circularInstances);
-    const standardThemes = ["Light", "Dark"];
-    const themesToUse = Array.from(/* @__PURE__ */ new Set([...standardThemes, ...detectedThemes]));
-    console.log("Themes to use:", themesToUse);
     figma.ui.postMessage({
       type: "THEMES_AVAILABLE",
-      themes: themesToUse,
-      instanceCount,
-      selectionCount: figma.currentPage.selection.length,
-      circularInstances
+      themes: ["Light", "Dark"],
+      selectionCount: figma.currentPage.selection.length
     });
   }
   figma.ui.onmessage = (msg) => {
@@ -96,16 +87,21 @@ function main_default() {
     } else if (msg.type === "SUBMIT") {
       console.log("Applying theme:", msg.formValues.theme);
       const theme = msg.formValues.theme;
+      figma.ui.postMessage({
+        type: "APPLYING_THEME"
+      });
       const result = applyThemeToSelection(theme);
       console.log("Updated instances count:", result.updatedCount);
       console.log("Circular instances in result:", result.circularInstances);
       console.log("Circular instances count:", result.circularInstances.length);
+      console.log("Checked layers count:", result.checkedLayersCount);
       figma.ui.postMessage({
         type: "THEME_APPLIED",
         updatedCount: result.updatedCount,
         skippedCount: result.skippedCount,
         circularInstances: result.circularInstances,
-        theme
+        theme,
+        checkedLayersCount: result.checkedLayersCount
       });
     } else if (msg.type === "CLOSE") {
       figma.closePlugin();
@@ -113,9 +109,6 @@ function main_default() {
       figma.closePlugin();
     }
   };
-  figma.on("selectionchange", () => {
-    updateThemesFromSelection();
-  });
   setTimeout(() => {
     updateThemesFromSelection();
   }, 300);
@@ -139,78 +132,50 @@ function hasCircularReference(instance) {
   }
   return false;
 }
-function findAvailableThemes() {
-  const themes = /* @__PURE__ */ new Set();
-  let instanceCount = 0;
-  let themePropertyCount = 0;
-  const circularInstances = [];
-  function traverseNode(node) {
-    if (node.type === "INSTANCE") {
-      instanceCount++;
-      console.log("Instance found:", node.name);
-      if (node.mainComponent) {
-        console.log("Main component:", node.mainComponent.name);
-        if (hasCircularReference(node)) {
-          console.error("Skipping theme detection for circular instance:", node.name);
-          circularInstances.push({
-            name: node.name,
-            id: node.id
-          });
-          return;
-        }
-      }
-      try {
-        const componentProperties = node.componentProperties;
-        if (componentProperties && "Theme" in componentProperties) {
-          themePropertyCount++;
-          const themeProperty = componentProperties["Theme"];
-          if (themeProperty && themeProperty.type === "VARIANT") {
-            if (themeProperty.value && typeof themeProperty.value === "string") {
-              themes.add(themeProperty.value);
-            }
-            try {
-              const mainComponent = node.mainComponent;
-              if (mainComponent) {
-                if (mainComponent.variantProperties) {
-                  if ("Theme" in mainComponent.variantProperties) {
-                    const themeValues = mainComponent.variantProperties["Theme"];
-                    if (Array.isArray(themeValues)) {
-                      themeValues.forEach((value) => {
-                        themes.add(value);
-                      });
-                    }
-                  }
-                }
-              }
-            } catch (error) {
-              console.error("Error accessing main component properties:", error);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error processing instance:", error);
-      }
-    }
-    if ("children" in node) {
-      for (const child of node.children) {
-        traverseNode(child);
-      }
-    }
-  }
-  figma.currentPage.selection.forEach((node) => traverseNode(node));
-  console.log(`Found ${instanceCount} instances, ${themePropertyCount} with Theme property`);
-  return {
-    themes: Array.from(themes),
-    instanceCount: themePropertyCount,
-    circularInstances
-  };
-}
 function applyThemeToSelection(theme) {
   let updatedCount = 0;
   let skippedCount = 0;
+  let checkedLayersCount = 0;
+  let instanceCount = 0;
+  let progressUpdateCounter = 0;
   const circularInstances = [];
+  let totalNodesToProcess = 0;
+  figma.currentPage.selection.forEach((node) => {
+    countNodes(node);
+  });
+  function countNodes(node) {
+    totalNodesToProcess++;
+    if ("children" in node) {
+      for (const child of node.children) {
+        countNodes(child);
+      }
+    }
+  }
+  console.log("Estimated total nodes to process:", totalNodesToProcess);
+  figma.ui.postMessage({
+    type: "PROGRESS_UPDATE",
+    checked: 0,
+    total: totalNodesToProcess,
+    updated: 0,
+    skipped: 0,
+    instances: 0
+  });
   function traverseNode(node) {
+    checkedLayersCount++;
+    progressUpdateCounter++;
+    if (progressUpdateCounter >= 20 || node.type === "INSTANCE") {
+      figma.ui.postMessage({
+        type: "PROGRESS_UPDATE",
+        checked: checkedLayersCount,
+        total: totalNodesToProcess,
+        updated: updatedCount,
+        skipped: skippedCount,
+        instances: instanceCount
+      });
+      progressUpdateCounter = 0;
+    }
     if (node.type === "INSTANCE") {
+      instanceCount++;
       console.log("Checking instance for update:", node.name);
       if (hasCircularReference(node)) {
         console.error("Skipping update for circular instance:", node.name);
@@ -253,9 +218,20 @@ function applyThemeToSelection(theme) {
     }
   }
   figma.currentPage.selection.forEach((node) => traverseNode(node));
+  figma.ui.postMessage({
+    type: "PROGRESS_UPDATE",
+    checked: checkedLayersCount,
+    total: totalNodesToProcess,
+    updated: updatedCount,
+    skipped: skippedCount,
+    instances: instanceCount,
+    isComplete: true
+  });
   console.log("Final circular instances count:", circularInstances.length);
   console.log("Circular instances:", circularInstances);
-  return { updatedCount, skippedCount, circularInstances };
+  console.log("Checked layers count:", checkedLayersCount);
+  console.log("Total instances count:", instanceCount);
+  return { updatedCount, skippedCount, circularInstances, checkedLayersCount };
 }
 var init_main = __esm({
   "src/main.ts"() {

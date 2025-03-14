@@ -48,24 +48,11 @@ export default function () {
       return
     }
     
-    // Find available themes and instances from component instances in the selection
-    const { themes: detectedThemes, instanceCount, circularInstances } = findAvailableThemes()
-    console.log('Detected themes:', detectedThemes)
-    console.log('Instance count:', instanceCount)
-    console.log('Circular instances:', circularInstances)
-    
-    // Always include both Light and Dark themes, plus any other detected themes
-    const standardThemes = ['Light', 'Dark']
-    const themesToUse = Array.from(new Set([...standardThemes, ...detectedThemes]))
-    console.log('Themes to use:', themesToUse)
-    
-    // Send themes and instance count to UI
+    // Just send the selection count to UI without analyzing
     figma.ui.postMessage({ 
       type: 'THEMES_AVAILABLE', 
-      themes: themesToUse,
-      instanceCount: instanceCount,
-      selectionCount: figma.currentPage.selection.length,
-      circularInstances: circularInstances
+      themes: ['Light', 'Dark'],
+      selectionCount: figma.currentPage.selection.length
     })
   }
   
@@ -77,11 +64,17 @@ export default function () {
       console.log('Applying theme:', msg.formValues.theme)
       const theme = msg.formValues.theme
       
+      // Notify UI that we're applying the theme
+      figma.ui.postMessage({
+        type: 'APPLYING_THEME'
+      })
+      
       // Apply the selected theme to all component instances in the selection
       const result = applyThemeToSelection(theme)
       console.log('Updated instances count:', result.updatedCount)
       console.log('Circular instances in result:', result.circularInstances)
       console.log('Circular instances count:', result.circularInstances.length)
+      console.log('Checked layers count:', result.checkedLayersCount)
       
       // Send the results back to the UI without showing notifications
       figma.ui.postMessage({
@@ -89,7 +82,8 @@ export default function () {
         updatedCount: result.updatedCount,
         skippedCount: result.skippedCount,
         circularInstances: result.circularInstances,
-        theme: theme
+        theme: theme,
+        checkedLayersCount: result.checkedLayersCount
       })
       
       // No notifications, success states will be shown in the UI
@@ -101,12 +95,7 @@ export default function () {
     }
   }
   
-  // Listen for selection changes
-  figma.on('selectionchange', () => {
-    updateThemesFromSelection()
-  })
-  
-  // Initial update
+  // Initial update - just check for empty selection
   setTimeout(() => {
     updateThemesFromSelection()
   }, 300)
@@ -142,14 +131,17 @@ function hasCircularReference(instance: InstanceNode): boolean {
 }
 
 // Function to find all available themes from component instances in the selection
-function findAvailableThemes(): { themes: string[], instanceCount: number, circularInstances: CircularInstance[] } {
-  const themes = new Set<string>()
+function findAvailableThemes(): { instanceCount: number, circularInstances: CircularInstance[], checkedLayersCount: number } {
   let instanceCount = 0
   let themePropertyCount = 0
+  let checkedLayersCount = 0
   const circularInstances: CircularInstance[] = []
   
   // Recursive function to traverse nodes
   function traverseNode(node: SceneNode) {
+    // Count each node we check
+    checkedLayersCount++
+    
     // Debug info for component instances
     if (node.type === 'INSTANCE') {
       instanceCount++
@@ -181,7 +173,7 @@ function findAvailableThemes(): { themes: string[], instanceCount: number, circu
           if (themeProperty && themeProperty.type === 'VARIANT') {
             // Get the current theme value
             if (themeProperty.value && typeof themeProperty.value === 'string') {
-              themes.add(themeProperty.value)
+              // themes.add(themeProperty.value)
             }
             
             // Try to get other possible values by checking other instances
@@ -194,7 +186,7 @@ function findAvailableThemes(): { themes: string[], instanceCount: number, circu
                     const themeValues = mainComponent.variantProperties['Theme']
                     if (Array.isArray(themeValues)) {
                       themeValues.forEach((value: string) => {
-                        themes.add(value)
+                        // themes.add(value)
                       })
                     }
                   }
@@ -221,23 +213,72 @@ function findAvailableThemes(): { themes: string[], instanceCount: number, circu
   // Traverse all selected nodes
   figma.currentPage.selection.forEach(node => traverseNode(node))
   
-  console.log(`Found ${instanceCount} instances, ${themePropertyCount} with Theme property`)
+  console.log(`Found ${instanceCount} instances, ${themePropertyCount} with Theme property, checked ${checkedLayersCount} layers total`)
   return { 
-    themes: Array.from(themes),
     instanceCount: themePropertyCount,
-    circularInstances: circularInstances
+    circularInstances: circularInstances,
+    checkedLayersCount: checkedLayersCount
   }
 }
 
 // Function to apply the selected theme to all component instances in the selection
-function applyThemeToSelection(theme: string): { updatedCount: number, skippedCount: number, circularInstances: CircularInstance[] } {
+function applyThemeToSelection(theme: string): { updatedCount: number, skippedCount: number, circularInstances: CircularInstance[], checkedLayersCount: number } {
   let updatedCount = 0
   let skippedCount = 0
+  let checkedLayersCount = 0
+  let instanceCount = 0
+  let progressUpdateCounter = 0
   const circularInstances: CircularInstance[] = []
+  
+  // Calculate total nodes to process for progress estimation
+  let totalNodesToProcess = 0
+  figma.currentPage.selection.forEach(node => {
+    // Rough estimate of total nodes
+    countNodes(node)
+  })
+  
+  function countNodes(node: SceneNode) {
+    totalNodesToProcess++
+    if ('children' in node) {
+      for (const child of node.children) {
+        countNodes(child)
+      }
+    }
+  }
+  
+  console.log('Estimated total nodes to process:', totalNodesToProcess)
+  
+  // Send initial progress update
+  figma.ui.postMessage({
+    type: 'PROGRESS_UPDATE',
+    checked: 0,
+    total: totalNodesToProcess,
+    updated: 0,
+    skipped: 0,
+    instances: 0
+  })
   
   // Recursive function to traverse nodes
   function traverseNode(node: SceneNode) {
+    // Count each node we check
+    checkedLayersCount++
+    
+    // Send progress updates periodically (every 20 nodes or for instances)
+    progressUpdateCounter++
+    if (progressUpdateCounter >= 20 || node.type === 'INSTANCE') {
+      figma.ui.postMessage({
+        type: 'PROGRESS_UPDATE',
+        checked: checkedLayersCount,
+        total: totalNodesToProcess,
+        updated: updatedCount,
+        skipped: skippedCount,
+        instances: instanceCount
+      })
+      progressUpdateCounter = 0
+    }
+    
     if (node.type === 'INSTANCE') {
+      instanceCount++
       console.log('Checking instance for update:', node.name)
       
       // Skip instances that are part of their own main component
@@ -292,8 +333,21 @@ function applyThemeToSelection(theme: string): { updatedCount: number, skippedCo
   // Traverse all selected nodes
   figma.currentPage.selection.forEach(node => traverseNode(node))
   
+  // Send final progress update
+  figma.ui.postMessage({
+    type: 'PROGRESS_UPDATE',
+    checked: checkedLayersCount,
+    total: totalNodesToProcess,
+    updated: updatedCount,
+    skipped: skippedCount,
+    instances: instanceCount,
+    isComplete: true
+  })
+  
   console.log('Final circular instances count:', circularInstances.length)
   console.log('Circular instances:', circularInstances)
+  console.log('Checked layers count:', checkedLayersCount)
+  console.log('Total instances count:', instanceCount)
   
-  return { updatedCount, skippedCount, circularInstances }
+  return { updatedCount, skippedCount, circularInstances, checkedLayersCount }
 } 
