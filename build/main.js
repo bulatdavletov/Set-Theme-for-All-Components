@@ -69,17 +69,19 @@ function main_default() {
     console.log("Plugin launched with command:", figma.command);
     if (figma.command === "apply-dark-theme") {
       const result = applyThemeToSelectionCommand("Dark");
-      figma.notify(`\u2728 Applied Dark theme to ${result.updatedCount} components. Checked ${result.checkedLayersCount} layers.`);
-      if (result.skippedCount > 0) {
-        figma.notify(`\u2139\uFE0F Skipped ${result.skippedCount} components that already had the desired theme.`);
+      if (result.updatedCount > 0) {
+        figma.notify(`\u2705 Updated ${result.updatedCount} / ${result.skippedCount + result.updatedCount}`);
+      } else if (result.skippedCount > 0) {
+        figma.notify(`\u{1F31A} Everything already Dark`);
       }
       figma.closePlugin();
       return;
     } else if (figma.command === "apply-light-theme") {
       const result = applyThemeToSelectionCommand("Light");
-      figma.notify(`\u2728 Applied Light theme to ${result.updatedCount} components. Checked ${result.checkedLayersCount} layers.`);
-      if (result.skippedCount > 0) {
-        figma.notify(`\u2139\uFE0F Skipped ${result.skippedCount} components that already had the desired theme.`);
+      if (result.updatedCount > 0) {
+        figma.notify(`\u2705 Updated ${result.updatedCount}/${result.skippedCount + result.updatedCount}`);
+      } else if (result.skippedCount > 0) {
+        figma.notify(`\u2600\uFE0F Everything already Light`);
       }
       figma.closePlugin();
       return;
@@ -149,6 +151,12 @@ function hasCircularReference(instance) {
         console.log("Ignoring instance from same component set:", instance.name);
         return false;
       }
+      if (parent.type === "INSTANCE") {
+        if (parent.mainComponent && parent.mainComponent.parent && parent.mainComponent.parent.id === mainComponentSetId) {
+          console.log("Potential cycle detected: Instance nested inside another instance from the same component set:", instance.name);
+          return true;
+        }
+      }
       parent = parent.parent;
     }
     return false;
@@ -187,6 +195,7 @@ function applyThemeToSelection(theme) {
   });
   function traverseNode(node) {
     checkedLayersCount++;
+    console.log("Checking layer:", node.name, "Type:", node.type);
     progressUpdateCounter++;
     if (progressUpdateCounter >= 20 || node.type === "INSTANCE") {
       figma.ui.postMessage({
@@ -222,8 +231,21 @@ function applyThemeToSelection(theme) {
               } else {
                 try {
                   console.log("Updating theme for node:", node.name);
-                  node.setProperties({ Theme: theme });
-                  updatedCount++;
+                  try {
+                    node.setProperties({ Theme: theme });
+                    updatedCount++;
+                  } catch (error) {
+                    if (error.message && error.message.includes("cycle")) {
+                      console.log("Cycle error detected when updating theme for:", node.name, "- Skipping this instance");
+                      circularInstances.push({
+                        name: node.name,
+                        id: node.id
+                      });
+                    } else {
+                      console.error("Error updating theme for node:", node.name, error);
+                    }
+                    skippedCount++;
+                  }
                 } catch (error) {
                   console.error("Error updating theme for node:", node.name, error);
                   skippedCount++;
@@ -279,6 +301,7 @@ function applyThemeToSelectionCommand(theme) {
   console.log("Estimated total nodes to process:", totalNodesToProcess);
   function traverseNodeCommand(node) {
     checkedLayersCount++;
+    console.log("Checking layer:", node.name, "Type:", node.type);
     if (node.type === "INSTANCE") {
       instanceCount++;
       console.log("Checking instance for update:", node.name);
@@ -302,8 +325,21 @@ function applyThemeToSelectionCommand(theme) {
               } else {
                 try {
                   console.log("Updating theme for node:", node.name);
-                  node.setProperties({ Theme: theme });
-                  updatedCount++;
+                  try {
+                    node.setProperties({ Theme: theme });
+                    updatedCount++;
+                  } catch (error) {
+                    if (error.message && error.message.includes("cycle")) {
+                      console.log("Cycle error detected when updating theme for:", node.name, "- Skipping this instance");
+                      circularInstances.push({
+                        name: node.name,
+                        id: node.id
+                      });
+                    } else {
+                      console.error("Error updating theme for node:", node.name, error);
+                    }
+                    skippedCount++;
+                  }
                 } catch (error) {
                   console.error("Error updating theme for node:", node.name, error);
                   skippedCount++;

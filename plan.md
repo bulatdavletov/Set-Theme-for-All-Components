@@ -136,8 +136,23 @@ The plugin has been successfully implemented and debugged. All core functionalit
   - Updated notification messages to only mention skipped components that already had the desired theme
   - Removed all mentions of circular references from user-facing messages
   - Changed warning icon (⚠️) to info icon (ℹ️) for skipped components notification
+- Fixed notification issues in command mode:
+  - Added timeout to skipped components notification to make it automatically close
+  - Improved the message for zero updated components to be more friendly
+  - Consolidated multiple notifications into a single message with clear format:
+    - Shows ratio of updated to total themed components: "✅ Updated X/N"
+    - Uses friendly message when nothing was updated: "🌚 Everything already Dark" or "☀️ Everything already Light"
+    - Shows no notification at all if nothing was updated or already themed
+    - Added appropriate emojis for better visual distinction
+- Added comprehensive logging of all checked layer names in the console for debugging
+- Enhanced cycle detection for nested instances:
+  - Improved the hasCircularReference function to detect instances nested inside other instances from the same component set
+  - Added specific handling for cycle-related errors when updating themes
+  - Properly categorized cycle errors to prevent console error messages
+  - Added more detailed logging for cycle detection to aid in debugging
+  - This fixes issues with nested instances that have overridden themes (e.g., a Dark theme instance containing a Light theme instance)
 
-### Recent Fixes
+## Recent Fixes
 - Added comprehensive logging to debug UI and main code execution
 - Improved error handling with try/catch blocks to prevent crashes
 - Added fallback theme values (Light/Dark) when no themes are detected
@@ -204,6 +219,21 @@ The plugin has been successfully implemented and debugged. All core functionalit
   - Removed early returns that were preventing traversal into instance children
   - Restructured the code to always traverse children, even for instances
   - This ensures all nested instances are properly checked and updated
+- Fixed notification issues in command mode:
+  - Added timeout to skipped components notification to make it automatically close
+  - Improved the message for zero updated components to be more friendly
+  - Consolidated multiple notifications into a single message with clear format:
+    - Shows ratio of updated to total themed components: "✅ Updated X/N"
+    - Uses friendly message when nothing was updated: "🌚 Everything already Dark" or "☀️ Everything already Light"
+    - Shows no notification at all if nothing was updated or already themed
+    - Added appropriate emojis for better visual distinction
+- Added comprehensive logging of all checked layer names in the console for debugging
+- Enhanced cycle detection for nested instances:
+  - Improved the hasCircularReference function to detect instances nested inside other instances from the same component set
+  - Added specific handling for cycle-related errors when updating themes
+  - Properly categorized cycle errors to prevent console error messages
+  - Added more detailed logging for cycle detection to aid in debugging
+  - This fixes issues with nested instances that have overridden themes (e.g., a Dark theme instance containing a Light theme instance)
 
 ## Algorithm Explanation
 

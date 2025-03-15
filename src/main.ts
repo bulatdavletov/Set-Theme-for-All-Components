@@ -40,22 +40,28 @@ export default function () {
     // Handle menu commands
     if (figma.command === 'apply-dark-theme') {
       const result = applyThemeToSelectionCommand('Dark')
-      figma.notify(`✨ Applied Dark theme to ${result.updatedCount} components. Checked ${result.checkedLayersCount} layers.`)
       
-      // Show skipped count (only already themed instances)
-      if (result.skippedCount > 0) {
-        figma.notify(`ℹ️ Skipped ${result.skippedCount} components that already had the desired theme.`);
+      // Show message based on results
+      if (result.updatedCount > 0) {
+        // Show ratio of updated to already themed
+        figma.notify(`✅ Updated ${result.updatedCount} / ${result.skippedCount + result.updatedCount}`)
+      } else if (result.skippedCount > 0) {
+        // If nothing was updated but some were already themed
+        figma.notify(`🌚 Everything already Dark`)
       }
       
       figma.closePlugin()
       return
     } else if (figma.command === 'apply-light-theme') {
       const result = applyThemeToSelectionCommand('Light')
-      figma.notify(`✨ Applied Light theme to ${result.updatedCount} components. Checked ${result.checkedLayersCount} layers.`)
       
-      // Show skipped count (only already themed instances)
-      if (result.skippedCount > 0) {
-        figma.notify(`ℹ️ Skipped ${result.skippedCount} components that already had the desired theme.`);
+      // Show message based on results
+      if (result.updatedCount > 0) {
+        // Show ratio of updated to already themed
+        figma.notify(`✅ Updated ${result.updatedCount}/${result.skippedCount + result.updatedCount}`)
+      } else if (result.skippedCount > 0) {
+        // If nothing was updated but some were already themed
+        figma.notify(`☀️ Everything already Light`)
       }
       
       figma.closePlugin()
@@ -158,6 +164,16 @@ function hasCircularReference(instance: InstanceNode): boolean {
         return false
       }
       
+      // Enhanced check: Is this instance inside another instance from the same component set?
+      if (parent.type === 'INSTANCE') {
+        // Check if the parent instance's main component is from the same component set
+        if (parent.mainComponent && parent.mainComponent.parent && 
+            parent.mainComponent.parent.id === mainComponentSetId) {
+          console.log('Potential cycle detected: Instance nested inside another instance from the same component set:', instance.name)
+          return true
+        }
+      }
+      
       parent = parent.parent
     }
     
@@ -181,6 +197,9 @@ function findAvailableThemes(): { instanceCount: number, circularInstances: Circ
   function traverseNode(node: SceneNode) {
     // Count each node we check
     checkedLayersCount++
+    
+    // Log the layer name
+    console.log('Checking layer:', node.name, 'Type:', node.type)
     
     // Debug info for component instances
     if (node.type === 'INSTANCE') {
@@ -303,6 +322,9 @@ function applyThemeToSelection(theme: string): { updatedCount: number, skippedCo
     // Count each node we check
     checkedLayersCount++
     
+    // Log the layer name
+    console.log('Checking layer:', node.name, 'Type:', node.type)
+    
     // Send progress updates periodically (every 20 nodes or for instances)
     progressUpdateCounter++
     if (progressUpdateCounter >= 20 || node.type === 'INSTANCE') {
@@ -345,8 +367,22 @@ function applyThemeToSelection(theme: string): { updatedCount: number, skippedCo
                 // Try to update the theme property
                 try {
                   console.log('Updating theme for node:', node.name)
-                  node.setProperties({ Theme: theme })
-                  updatedCount++
+                  try {
+                    node.setProperties({ Theme: theme })
+                    updatedCount++
+                  } catch (error: any) {
+                    // Check if the error is related to cycles
+                    if (error.message && error.message.includes('cycle')) {
+                      console.log('Cycle error detected when updating theme for:', node.name, '- Skipping this instance')
+                      circularInstances.push({
+                        name: node.name,
+                        id: node.id
+                      })
+                    } else {
+                      console.error('Error updating theme for node:', node.name, error)
+                    }
+                    skippedCount++
+                  }
                 } catch (error) {
                   console.error('Error updating theme for node:', node.name, error)
                   skippedCount++
@@ -421,6 +457,9 @@ function applyThemeToSelectionCommand(theme: string): { updatedCount: number, sk
     // Count each node we check
     checkedLayersCount++
     
+    // Log the layer name
+    console.log('Checking layer:', node.name, 'Type:', node.type)
+    
     if (node.type === 'INSTANCE') {
       instanceCount++
       console.log('Checking instance for update:', node.name)
@@ -449,8 +488,22 @@ function applyThemeToSelectionCommand(theme: string): { updatedCount: number, sk
                 // Try to update the theme property
                 try {
                   console.log('Updating theme for node:', node.name)
-                  node.setProperties({ Theme: theme })
-                  updatedCount++
+                  try {
+                    node.setProperties({ Theme: theme })
+                    updatedCount++
+                  } catch (error: any) {
+                    // Check if the error is related to cycles
+                    if (error.message && error.message.includes('cycle')) {
+                      console.log('Cycle error detected when updating theme for:', node.name, '- Skipping this instance')
+                      circularInstances.push({
+                        name: node.name,
+                        id: node.id
+                      })
+                    } else {
+                      console.error('Error updating theme for node:', node.name, error)
+                    }
+                    skippedCount++
+                  }
                 } catch (error) {
                   console.error('Error updating theme for node:', node.name, error)
                   skippedCount++
