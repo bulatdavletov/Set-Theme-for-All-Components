@@ -32,6 +32,38 @@ export interface CircularInstance {
 
 export default function () {
   console.log('Plugin started')
+  
+  // Check if the plugin was launched with a command
+  if (figma.command) {
+    console.log('Plugin launched with command:', figma.command)
+    
+    // Handle menu commands
+    if (figma.command === 'apply-dark-theme') {
+      const result = applyThemeToSelectionCommand('Dark')
+      figma.notify(`✨ Applied Dark theme to ${result.updatedCount} components. Checked ${result.checkedLayersCount} layers.`)
+      
+      // Show skipped count (only already themed instances)
+      if (result.skippedCount > 0) {
+        figma.notify(`ℹ️ Skipped ${result.skippedCount} components that already had the desired theme.`);
+      }
+      
+      figma.closePlugin()
+      return
+    } else if (figma.command === 'apply-light-theme') {
+      const result = applyThemeToSelectionCommand('Light')
+      figma.notify(`✨ Applied Light theme to ${result.updatedCount} components. Checked ${result.checkedLayersCount} layers.`)
+      
+      // Show skipped count (only already themed instances)
+      if (result.skippedCount > 0) {
+        figma.notify(`ℹ️ Skipped ${result.skippedCount} components that already had the desired theme.`);
+      }
+      
+      figma.closePlugin()
+      return
+    }
+  }
+  
+  // If no command or unknown command, show the UI
   const options = { width: 240, height: 320 }
   
   // Show UI immediately
@@ -105,29 +137,37 @@ export default function () {
 function hasCircularReference(instance: InstanceNode): boolean {
   if (!instance.mainComponent) return false
   
-  const mainComponentId = instance.mainComponent.id
-  const mainComponentSetId = instance.mainComponent.parent?.id
-  let parent = instance.parent
-  
-  while (parent) {
-    // Check if parent is a component and has the same ID as the main component
-    if (parent.type === 'COMPONENT' && parent.id === mainComponentId) {
-      console.error('CIRCULAR REFERENCE DETECTED:', instance.name, 'is inside its own main component:', instance.mainComponent.name)
-      return true
+  try {
+    const mainComponentId = instance.mainComponent.id
+    const mainComponentSetId = instance.mainComponent.parent?.id
+    let parent = instance.parent
+    
+    // First check: Is this instance inside its own main component?
+    while (parent) {
+      // Check if parent is a component and has the same ID as the main component
+      if (parent.type === 'COMPONENT' && parent.id === mainComponentId) {
+        console.log('Circular reference detected:', instance.name, 'is inside its own main component')
+        return true
+      }
+      
+      // Check if parent is a component set and contains the main component
+      if (parent.type === 'COMPONENT_SET' && parent.id === mainComponentSetId) {
+        // If they're from the same component set, this is likely a theme variation
+        // (like Light/Dark variants), so we'll ignore it
+        console.log('Ignoring instance from same component set:', instance.name);
+        return false
+      }
+      
+      parent = parent.parent
     }
     
-    // Check if parent is a component set and contains the main component
-    if (parent.type === 'COMPONENT_SET' && parent.id === mainComponentSetId) {
-      // If they're from the same component set, this is likely a theme variation
-      // (like Light/Dark variants), so we'll ignore it
-      console.log('Ignoring instance from same component set:', instance.name);
-      return false
-    }
-    
-    parent = parent.parent
+    // If we made it here, there's no circular reference detected in the hierarchy
+    return false
+  } catch (error) {
+    // If any error occurs during the check, log it but don't treat it as circular
+    console.log('Error checking for circular reference, ignoring:', instance.name)
+    return false
   }
-  
-  return false
 }
 
 // Function to find all available themes from component instances in the selection
@@ -221,7 +261,7 @@ function findAvailableThemes(): { instanceCount: number, circularInstances: Circ
   }
 }
 
-// Function to apply the selected theme to all component instances in the selection
+// Function to apply the selected theme to all component instances in the selection (UI Mode)
 function applyThemeToSelection(theme: string): { updatedCount: number, skippedCount: number, circularInstances: CircularInstance[], checkedLayersCount: number } {
   let updatedCount = 0
   let skippedCount = 0
@@ -290,39 +330,37 @@ function applyThemeToSelection(theme: string): { updatedCount: number, skippedCo
         })
         console.log('Added circular instance to list:', node.name, 'Total:', circularInstances.length)
         skippedCount++
-        return
-      }
-      
-      try {
-        // Check if the instance has a "Theme" property
-        const componentProperties = node.componentProperties
-        if (componentProperties && 'Theme' in componentProperties) {
-          const themeProperty = componentProperties['Theme']
-          if (themeProperty && themeProperty.type === 'VARIANT') {
-            // Check if the instance already has the desired theme
-            if (themeProperty.value === theme) {
-              console.log('Instance already has the desired theme:', node.name)
-              skippedCount++
-              return
-            }
-            
-            // Try to update the theme property
-            try {
-              console.log('Updating theme for node:', node.name)
-              node.setProperties({ Theme: theme })
-              updatedCount++
-            } catch (error) {
-              console.error('Error updating theme for node:', node.name, error)
-              skippedCount++
+      } else {
+        try {
+          // Check if the instance has a "Theme" property
+          const componentProperties = node.componentProperties
+          if (componentProperties && 'Theme' in componentProperties) {
+            const themeProperty = componentProperties['Theme']
+            if (themeProperty && themeProperty.type === 'VARIANT') {
+              // Check if the instance already has the desired theme
+              if (themeProperty.value === theme) {
+                console.log('Instance already has the desired theme:', node.name)
+                skippedCount++
+              } else {
+                // Try to update the theme property
+                try {
+                  console.log('Updating theme for node:', node.name)
+                  node.setProperties({ Theme: theme })
+                  updatedCount++
+                } catch (error) {
+                  console.error('Error updating theme for node:', node.name, error)
+                  skippedCount++
+                }
+              }
             }
           }
+        } catch (error) {
+          console.error('Error processing instance for theme update:', error)
         }
-      } catch (error) {
-        console.error('Error processing instance for theme update:', error)
       }
     }
     
-    // Traverse children if the node is a parent
+    // Always traverse children, even for instances
     if ('children' in node) {
       for (const child of node.children) {
         traverseNode(child)
@@ -343,6 +381,99 @@ function applyThemeToSelection(theme: string): { updatedCount: number, skippedCo
     instances: instanceCount,
     isComplete: true
   })
+  
+  console.log('Final circular instances count:', circularInstances.length)
+  console.log('Circular instances:', circularInstances)
+  console.log('Checked layers count:', checkedLayersCount)
+  console.log('Total instances count:', instanceCount)
+  
+  return { updatedCount, skippedCount, circularInstances, checkedLayersCount }
+}
+
+// Function to apply the selected theme to all component instances in the selection (Command Mode - No UI)
+function applyThemeToSelectionCommand(theme: string): { updatedCount: number, skippedCount: number, circularInstances: CircularInstance[], checkedLayersCount: number } {
+  let updatedCount = 0
+  let skippedCount = 0
+  let checkedLayersCount = 0
+  let instanceCount = 0
+  const circularInstances: CircularInstance[] = []
+  
+  // Calculate total nodes to process for progress estimation
+  let totalNodesToProcess = 0
+  figma.currentPage.selection.forEach(node => {
+    // Rough estimate of total nodes
+    countNodesCommand(node)
+  })
+  
+  function countNodesCommand(node: SceneNode) {
+    totalNodesToProcess++
+    if ('children' in node) {
+      for (const child of node.children) {
+        countNodesCommand(child)
+      }
+    }
+  }
+  
+  console.log('Estimated total nodes to process:', totalNodesToProcess)
+  
+  // Recursive function to traverse nodes
+  function traverseNodeCommand(node: SceneNode) {
+    // Count each node we check
+    checkedLayersCount++
+    
+    if (node.type === 'INSTANCE') {
+      instanceCount++
+      console.log('Checking instance for update:', node.name)
+      
+      // Skip instances that are part of their own main component
+      if (hasCircularReference(node)) {
+        console.error('Skipping update for circular instance:', node.name)
+        circularInstances.push({
+          name: node.name,
+          id: node.id
+        })
+        console.log('Added circular instance to list:', node.name, 'Total:', circularInstances.length)
+        skippedCount++
+      } else {
+        try {
+          // Check if the instance has a "Theme" property
+          const componentProperties = node.componentProperties
+          if (componentProperties && 'Theme' in componentProperties) {
+            const themeProperty = componentProperties['Theme']
+            if (themeProperty && themeProperty.type === 'VARIANT') {
+              // Check if the instance already has the desired theme
+              if (themeProperty.value === theme) {
+                console.log('Instance already has the desired theme:', node.name)
+                skippedCount++
+              } else {
+                // Try to update the theme property
+                try {
+                  console.log('Updating theme for node:', node.name)
+                  node.setProperties({ Theme: theme })
+                  updatedCount++
+                } catch (error) {
+                  console.error('Error updating theme for node:', node.name, error)
+                  skippedCount++
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error processing instance for theme update:', error)
+        }
+      }
+    }
+    
+    // Always traverse children, even for instances
+    if ('children' in node) {
+      for (const child of node.children) {
+        traverseNodeCommand(child)
+      }
+    }
+  }
+  
+  // Traverse all selected nodes
+  figma.currentPage.selection.forEach(node => traverseNodeCommand(node))
   
   console.log('Final circular instances count:', circularInstances.length)
   console.log('Circular instances:', circularInstances)

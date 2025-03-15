@@ -1,1 +1,12 @@
-{"api":"1.0.0","editorType":["figma"],"id":"1482433099191106349","name":"Set Theme for All Components","main":"build/main.js","ui":"build/ui.js"}
+{
+  "api": "1.0.0",
+  "editorType": ["figma"],
+  "id": "1482433099191106349",
+  "name": "Set Theme for All Components",
+  "main": "build/main.js",
+  "ui": "build/ui.js",
+  "menu": [
+    {"name": "Apply Dark Theme to All", "command": "apply-dark-theme"},
+    {"name": "Apply Light Theme to All", "command": "apply-light-theme"}
+  ]
+}

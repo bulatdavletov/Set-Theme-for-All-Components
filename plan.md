@@ -11,9 +11,12 @@
 - ✅ Performance improvement: Only check layers when Apply button is pressed, show real-time progress
 - ✅ Remove "Selected: N" text from UI
 - ✅ Don't show skipped count. Show Applied count. If zero, tell something nice
-- No ui version, with Figma native actions. Use notifications for feedback.
-    - Dark Theme. Apply to all instances
-    - Light Theme. Apply to all instances
+- ✅ No ui version, with Figma native actions. Use notifications for feedback.
+    - ✅ Apply Dark Theme to All
+    - ✅ Apply Light Theme to All
+- ✅ Fix nested instances: Check and update instances inside other instances
+- ✅ Suppress circular reference errors and simplify notifications
+- Add command to show UI, because now there is no way to do it.
 
 ## Description
 This plugin allows users to quickly set a theme for all component instances within a selection. The plugin provides a segmented control interface where users can select a theme, and upon confirmation, the plugin will update the "Theme" property for all component instances found within the selection.
@@ -115,6 +118,24 @@ The plugin has been successfully implemented and debugged. All core functionalit
 - Added detailed loading states for long-running operations
 - Uses only hardcoded Light and Dark themes instead of searching for available themes
 - Shows the total number of checked layers in both the main view and results screen
+- Added menu commands for direct theme application without UI:
+  - "Apply Dark Theme to All" command applies Dark theme to all components with notifications for feedback
+  - "Apply Light Theme to All" command applies Light theme to all components with notifications for feedback
+  - Both commands show the number of components updated and layers checked
+  - Both commands notify about any skipped components with circular references
+  - Commands operate in a UI-less mode, communicating exclusively through Figma notifications
+  - Implemented separate command-specific functions to avoid UI-related code when running in command mode
+- Fixed handling of nested instances:
+  - Now properly checks and updates instances that are inside other instances
+  - Traverses through all children of instances to find nested instances
+  - Ensures all instances in the selection are updated, regardless of nesting level
+- Improved circular reference handling and simplified notifications:
+  - Modified circular reference detection to be more lenient
+  - Changed console.error to console.log to avoid red error messages in the console
+  - Removed the second check that was causing false positives
+  - Updated notification messages to only mention skipped components that already had the desired theme
+  - Removed all mentions of circular references from user-facing messages
+  - Changed warning icon (⚠️) to info icon (ℹ️) for skipped components notification
 
 ### Recent Fixes
 - Added comprehensive logging to debug UI and main code execution
@@ -172,6 +193,110 @@ The plugin has been successfully implemented and debugged. All core functionalit
   - Moved "Checked X layers in total" to the bottom of results for better visual hierarchy
   - Removed the Clear Results button to streamline the interface
   - Fixed alignment of the checkmark icon in "Applied: X components" message
+- Added menu commands for direct theme application:
+  - Created menu items in the manifest.json file
+  - Implemented command handling in the main code
+  - Created a separate command-specific function for theme application that doesn't use UI
+  - Added notifications for feedback when running in command mode
+  - Fixed issues with UI messaging when running in command mode
+- Fixed handling of nested instances:
+  - Modified both UI and command mode functions to check instances inside other instances
+  - Removed early returns that were preventing traversal into instance children
+  - Restructured the code to always traverse children, even for instances
+  - This ensures all nested instances are properly checked and updated
+
+## Algorithm Explanation
+
+### How the Plugin Works
+
+The plugin follows a systematic approach to apply themes to component instances:
+
+1. **Initialization**:
+   - The plugin can be launched in two ways:
+     - Via menu commands ("Apply Dark Theme to All" or "Apply Light Theme to All")
+     - Via the normal plugin interface with UI
+   - In command mode, it directly applies the specified theme without showing UI
+   - In UI mode, it shows a segmented control for theme selection
+
+2. **Node Traversal Algorithm**:
+   - The plugin uses a recursive depth-first traversal to process all nodes in the selection:
+   ```typescript
+   function traverseNode(node: SceneNode) {
+     // Process current node
+     if (node.type === 'INSTANCE') {
+       // Handle component instance
+     }
+     
+     // Recursively process children
+     if ('children' in node) {
+       for (const child of node.children) {
+         traverseNode(child)
+       }
+     }
+   }
+   ```
+
+3. **Component Instance Processing**:
+   - For each instance, the plugin:
+     1. Checks if it has a circular reference (is part of its own main component)
+     2. Checks if it has a "Theme" property
+     3. Checks if the current theme matches the desired theme
+     4. Updates the theme if needed
+
+4. **Circular Reference Detection**:
+   - The plugin uses a specialized function to detect circular references:
+   ```typescript
+   function hasCircularReference(instance: InstanceNode): boolean {
+     // Check if instance is part of its own main component
+     // This prevents "Components can't contain instances of themselves" errors
+   }
+   ```
+
+5. **Theme Application**:
+   - The plugin uses the Figma API to update the theme property:
+   ```typescript
+   node.setProperties({ Theme: theme });
+   ```
+
+6. **Progress Tracking**:
+   - Throughout the process, the plugin tracks:
+     - Total layers checked
+     - Instances updated
+     - Instances skipped (already had the theme or circular references)
+     - Progress percentage (for UI feedback)
+
+7. **Results Reporting**:
+   - In UI mode: Shows a detailed results screen
+   - In command mode: Displays Figma notifications with summary information
+
+### Performance Optimizations
+
+1. **Selective Processing**:
+   - Only processes nodes when needed (when Apply button is pressed)
+   - Skips instances that already have the desired theme
+
+2. **Progress Updates**:
+   - Provides real-time progress updates for large selections
+   - Updates UI periodically rather than after every node to prevent performance issues
+
+3. **Error Handling**:
+   - Catches and handles errors during theme application
+   - Prevents plugin crashes due to circular references or other issues
+
+### Special Cases
+
+1. **Nested Instances**:
+   - The plugin handles instances inside other instances by recursively traversing all children
+   - This ensures all instances are updated regardless of nesting level
+
+2. **Circular References**:
+   - Detects and skips instances that are part of their own main component
+   - Prevents the "Components can't contain instances of themselves" error
+   - Provides feedback on skipped instances
+
+3. **Theme Property Variations**:
+   - Handles different Figma API structures for component properties
+   - Ensures compatibility with various component setups
 
 ## Next Steps
 1. ~~Set up the initial project structure~~ ✅
