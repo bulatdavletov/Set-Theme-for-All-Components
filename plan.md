@@ -20,6 +20,11 @@
 - ✅ Update manifest.json with required fields for publishing:
     - ✅ Added "networkAccess" with "allowedDomains": ["none"]
     - ✅ Added "documentAccess": "dynamic-page"
+- ✅ Update code to support dynamic-page loading:
+    - ✅ Replaced direct mainComponent access with getMainComponentAsync()
+    - ✅ Updated functions to be async/await compatible
+    - ✅ Fixed circular reference detection to work asynchronously
+    - ✅ Made main function async and properly awaited results from async functions
 
 ## Description
 This plugin allows users to quickly set a theme for all component instances within a selection. The plugin provides a segmented control interface where users can select a theme, and upon confirmation, the plugin will update the "Theme" property for all component instances found within the selection.

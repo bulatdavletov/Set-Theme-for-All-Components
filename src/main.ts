@@ -30,7 +30,7 @@ export interface CircularInstance {
   id: string;
 }
 
-export default function () {
+export default async function () {
   console.log('Plugin started')
   
   // Check if the plugin was launched with a command
@@ -39,7 +39,7 @@ export default function () {
     
     // Handle menu commands
     if (figma.command === 'apply-dark-theme') {
-      const result = applyThemeToSelectionCommand('Dark')
+      const result = await applyThemeToSelectionCommand('Dark')
       
       // Show message based on results
       if (result.updatedCount > 0) {
@@ -53,7 +53,7 @@ export default function () {
       figma.closePlugin()
       return
     } else if (figma.command === 'apply-light-theme') {
-      const result = applyThemeToSelectionCommand('Light')
+      const result = await applyThemeToSelectionCommand('Light')
       
       // Show message based on results
       if (result.updatedCount > 0) {
@@ -76,84 +76,120 @@ export default function () {
   showUI(options)
   
   // Function to update themes based on current selection
-  function updateThemesFromSelection() {
+  async function updateThemesFromSelection() {
+    console.log('Updating themes from selection');
+    
     // Check if there's a valid selection
     if (figma.currentPage.selection.length === 0) {
-      figma.ui.postMessage({ 
-        type: 'SELECTION_EMPTY',
-        message: 'Please select at least one layer'
-      })
-      return
+      console.log('No selection');
+      figma.ui.postMessage({
+        type: 'NO_SELECTION'
+      });
+      return;
     }
     
-    // Just send the selection count to UI without analyzing
-    figma.ui.postMessage({ 
-      type: 'THEMES_AVAILABLE', 
-      themes: ['Light', 'Dark'],
-      selectionCount: figma.currentPage.selection.length
-    })
+    // Find available themes from the selection
+    const result = await findAvailableThemes();
+    
+    // Always use hardcoded Light and Dark themes
+    const themes = ['Light', 'Dark'];
+    
+    // Send the themes to the UI
+    figma.ui.postMessage({
+      type: 'THEMES_AVAILABLE',
+      themes: themes,
+      instanceCount: result.instanceCount,
+      circularInstances: result.circularInstances,
+      checkedLayersCount: result.checkedLayersCount
+    });
   }
   
-  // Set up message handlers
-  figma.ui.onmessage = (msg) => {
-    if (msg.type === 'INIT' || msg.type === 'SELECTION_CHANGED') {
-      updateThemesFromSelection()
-    } else if (msg.type === 'SUBMIT') {
-      console.log('Applying theme:', msg.formValues.theme)
-      const theme = msg.formValues.theme
+  // Handle messages from the UI
+  figma.ui.onmessage = async (msg) => {
+    if (msg.type === 'SUBMIT') {
+      console.log('Applying theme:', msg.theme);
       
-      // Notify UI that we're applying the theme
+      // Apply the theme to all component instances in the selection
+      const result = await applyThemeToSelection(msg.theme);
+      
+      // Send the results back to the UI
       figma.ui.postMessage({
-        type: 'APPLYING_THEME'
-      })
-      
-      // Apply the selected theme to all component instances in the selection
-      const result = applyThemeToSelection(theme)
-      console.log('Updated instances count:', result.updatedCount)
-      console.log('Circular instances in result:', result.circularInstances)
-      console.log('Circular instances count:', result.circularInstances.length)
-      console.log('Checked layers count:', result.checkedLayersCount)
-      
-      // Send the results back to the UI without showing notifications
-      figma.ui.postMessage({
-        type: 'THEME_APPLIED',
+        type: 'RESULTS',
+        theme: msg.theme,
         updatedCount: result.updatedCount,
         skippedCount: result.skippedCount,
         circularInstances: result.circularInstances,
-        theme: theme,
         checkedLayersCount: result.checkedLayersCount
-      })
-      
-      // No notifications, success states will be shown in the UI
-      // No plugin closing, UI will remain visible
-    } else if (msg.type === 'CLOSE') {
-      figma.closePlugin()
+      });
+    } else if (msg.type === 'INIT' || msg.type === 'SELECTION_CHANGED') {
+      await updateThemesFromSelection();
     } else if (msg.type === 'CANCEL') {
-      figma.closePlugin()
+      figma.closePlugin();
     }
   }
   
+  // Handle commands
+  figma.on('run', async ({ command }) => {
+    if (command === 'apply-dark-theme') {
+      console.log('Running command: Apply Dark Theme to All');
+      
+      // Apply Dark theme to all component instances in the selection
+      const result = await applyThemeToSelectionCommand('Dark');
+      
+      // Show notification with results
+      if (result.updatedCount > 0) {
+        figma.notify(`✅ Updated ${result.updatedCount}/${result.updatedCount + result.skippedCount}`, { timeout: 3000 });
+      } else if (result.skippedCount > 0) {
+        figma.notify(`🌚 Everything already Dark`, { timeout: 3000 });
+      }
+      
+      // Close the plugin
+      figma.closePlugin();
+    } else if (command === 'apply-light-theme') {
+      console.log('Running command: Apply Light Theme to All');
+      
+      // Apply Light theme to all component instances in the selection
+      const result = await applyThemeToSelectionCommand('Light');
+      
+      // Show notification with results
+      if (result.updatedCount > 0) {
+        figma.notify(`✅ Updated ${result.updatedCount}/${result.updatedCount + result.skippedCount}`, { timeout: 3000 });
+      } else if (result.skippedCount > 0) {
+        figma.notify(`☀️ Everything already Light`, { timeout: 3000 });
+      }
+      
+      // Close the plugin
+      figma.closePlugin();
+    }
+  });
+  
   // Initial update - just check for empty selection
-  setTimeout(() => {
-    updateThemesFromSelection()
-  }, 300)
+  (async () => {
+    await updateThemesFromSelection();
+  })();
+
+  // Listen for selection changes
+  figma.on('selectionchange', async () => {
+    await updateThemesFromSelection();
+  });
 }
 
 // Function to check if an instance is part of its own main component (circular reference)
-function hasCircularReference(instance: InstanceNode): boolean {
-  if (!instance.mainComponent) return false
-  
+async function hasCircularReference(instance: InstanceNode): Promise<boolean> {
   try {
-    const mainComponentId = instance.mainComponent.id
-    const mainComponentSetId = instance.mainComponent.parent?.id
-    let parent = instance.parent
+    const mainComponent = await instance.getMainComponentAsync();
+    if (!mainComponent) return false;
+    
+    const mainComponentId = mainComponent.id;
+    const mainComponentSetId = mainComponent.parent?.id;
+    let parent = instance.parent;
     
     // First check: Is this instance inside its own main component?
     while (parent) {
       // Check if parent is a component and has the same ID as the main component
       if (parent.type === 'COMPONENT' && parent.id === mainComponentId) {
-        console.log('Circular reference detected:', instance.name, 'is inside its own main component')
-        return true
+        console.log('Circular reference detected:', instance.name, 'is inside its own main component');
+        return true;
       }
       
       // Check if parent is a component set and contains the main component
@@ -161,116 +197,122 @@ function hasCircularReference(instance: InstanceNode): boolean {
         // If they're from the same component set, this is likely a theme variation
         // (like Light/Dark variants), so we'll ignore it
         console.log('Ignoring instance from same component set:', instance.name);
-        return false
+        return false;
       }
       
       // Enhanced check: Is this instance inside another instance from the same component set?
       if (parent.type === 'INSTANCE') {
         // Check if the parent instance's main component is from the same component set
-        if (parent.mainComponent && parent.mainComponent.parent && 
-            parent.mainComponent.parent.id === mainComponentSetId) {
-          console.log('Potential cycle detected: Instance nested inside another instance from the same component set:', instance.name)
-          return true
+        const parentMainComponent = await parent.getMainComponentAsync();
+        if (parentMainComponent && parentMainComponent.parent && 
+            parentMainComponent.parent.id === mainComponentSetId) {
+          console.log('Potential cycle detected: Instance nested inside another instance from the same component set:', instance.name);
+          return true;
         }
       }
       
-      parent = parent.parent
+      parent = parent.parent;
     }
     
     // If we made it here, there's no circular reference detected in the hierarchy
-    return false
+    return false;
   } catch (error) {
-    // If any error occurs during the check, log it but don't treat it as circular
-    console.log('Error checking for circular reference, ignoring:', instance.name)
-    return false
+    console.log('Error checking for circular reference:', error);
+    return false;
   }
 }
 
 // Function to find all available themes from component instances in the selection
-function findAvailableThemes(): { instanceCount: number, circularInstances: CircularInstance[], checkedLayersCount: number } {
-  let instanceCount = 0
-  let themePropertyCount = 0
-  let checkedLayersCount = 0
-  const circularInstances: CircularInstance[] = []
+async function findAvailableThemes(): Promise<{ instanceCount: number, circularInstances: CircularInstance[], checkedLayersCount: number }> {
+  let instanceCount = 0;
+  let themePropertyCount = 0;
+  let checkedLayersCount = 0;
+  const circularInstances: CircularInstance[] = [];
   
   // Recursive function to traverse nodes
-  function traverseNode(node: SceneNode) {
-    // Count each node we check
-    checkedLayersCount++
+  async function traverseNode(node: SceneNode) {
+    checkedLayersCount++;
     
     // Log the layer name
-    console.log('Checking layer:', node.name, 'Type:', node.type)
+    console.log('Checking layer:', node.name, 'Type:', node.type);
     
     // Debug info for component instances
     if (node.type === 'INSTANCE') {
-      instanceCount++
-      console.log('Instance found:', node.name)
+      instanceCount++;
+      console.log('Instance found:', node.name);
       
       // Check for main component to detect circular references
-      if (node.mainComponent) {
-        console.log('Main component:', node.mainComponent.name)
-        
-        // Check if this instance is part of its own main component
-        if (hasCircularReference(node)) {
-          console.error('Skipping theme detection for circular instance:', node.name)
-          circularInstances.push({
-            name: node.name,
-            id: node.id
-          })
-          return // Skip this instance to avoid issues
+      try {
+        const mainComponent = await node.getMainComponentAsync();
+        if (mainComponent) {
+          console.log('Main component:', mainComponent.name);
+          
+          // Check if this instance is part of its own main component
+          const isCircular = await hasCircularReference(node);
+          if (isCircular) {
+            console.error('Skipping theme detection for circular instance:', node.name);
+            circularInstances.push({
+              name: node.name,
+              id: node.id
+            });
+            return; // Skip this instance to avoid issues
+          }
         }
+      } catch (error) {
+        console.log('Error getting main component:', error);
       }
       
       try {
         // Check if the instance has a "Theme" property
-        const componentProperties = node.componentProperties
+        const componentProperties = node.componentProperties;
         
         if (componentProperties && 'Theme' in componentProperties) {
-          themePropertyCount++
-          const themeProperty = componentProperties['Theme']
+          const themeProperty = componentProperties['Theme'];
           
           if (themeProperty && themeProperty.type === 'VARIANT') {
             // Get the current theme value
             if (themeProperty.value && typeof themeProperty.value === 'string') {
-              // themes.add(themeProperty.value)
+              // themes.add(themeProperty.value);
             }
             
             // Try to get other possible values by checking other instances
             try {
-              const mainComponent = node.mainComponent
+              const mainComponent = await node.getMainComponentAsync();
               if (mainComponent) {
                 // Method 1: Using variantProperties
                 if (mainComponent.variantProperties) {
                   if ('Theme' in mainComponent.variantProperties) {
-                    const themeValues = mainComponent.variantProperties['Theme']
+                    const themeValues = mainComponent.variantProperties['Theme'];
                     if (Array.isArray(themeValues)) {
                       themeValues.forEach((value: string) => {
-                        // themes.add(value)
-                      })
+                        // themes.add(value);
+                      });
                     }
                   }
                 }
               }
             } catch (error) {
-              console.error('Error accessing main component properties:', error)
+              console.log('Error getting theme values:', error);
             }
           }
         }
       } catch (error) {
-        console.error('Error processing instance:', error)
+        console.log('Error checking component properties:', error);
       }
     }
     
-    // Traverse children if the node is a parent
+    // Recursively process children
     if ('children' in node) {
       for (const child of node.children) {
-        traverseNode(child)
+        await traverseNode(child);
       }
     }
   }
   
-  // Traverse all selected nodes
-  figma.currentPage.selection.forEach(node => traverseNode(node))
+  // Start traversing from the selected nodes
+  for (const node of figma.currentPage.selection) {
+    await traverseNode(node);
+  }
   
   console.log(`Found ${instanceCount} instances, ${themePropertyCount} with Theme property, checked ${checkedLayersCount} layers total`)
   return { 
@@ -281,7 +323,7 @@ function findAvailableThemes(): { instanceCount: number, circularInstances: Circ
 }
 
 // Function to apply the selected theme to all component instances in the selection (UI Mode)
-function applyThemeToSelection(theme: string): { updatedCount: number, skippedCount: number, circularInstances: CircularInstance[], checkedLayersCount: number } {
+async function applyThemeToSelection(theme: string): Promise<{ updatedCount: number, skippedCount: number, circularInstances: CircularInstance[], checkedLayersCount: number }> {
   let updatedCount = 0
   let skippedCount = 0
   let checkedLayersCount = 0
@@ -318,94 +360,89 @@ function applyThemeToSelection(theme: string): { updatedCount: number, skippedCo
   })
   
   // Recursive function to traverse nodes
-  function traverseNode(node: SceneNode) {
-    // Count each node we check
-    checkedLayersCount++
+  async function traverseNode(node: SceneNode) {
+    checkedLayersCount++;
     
     // Log the layer name
-    console.log('Checking layer:', node.name, 'Type:', node.type)
+    console.log('Checking layer:', node.name, 'Type:', node.type);
     
-    // Send progress updates periodically (every 20 nodes or for instances)
-    progressUpdateCounter++
-    if (progressUpdateCounter >= 20 || node.type === 'INSTANCE') {
-      figma.ui.postMessage({
-        type: 'PROGRESS_UPDATE',
-        checked: checkedLayersCount,
-        total: totalNodesToProcess,
-        updated: updatedCount,
-        skipped: skippedCount,
-        instances: instanceCount
-      })
-      progressUpdateCounter = 0
-    }
-    
+    // Debug info for component instances
     if (node.type === 'INSTANCE') {
-      instanceCount++
-      console.log('Checking instance for update:', node.name)
+      instanceCount++;
+      console.log('Instance found:', node.name);
       
-      // Skip instances that are part of their own main component
-      if (hasCircularReference(node)) {
-        console.error('Skipping update for circular instance:', node.name)
-        circularInstances.push({
-          name: node.name,
-          id: node.id
-        })
-        console.log('Added circular instance to list:', node.name, 'Total:', circularInstances.length)
-        skippedCount++
-      } else {
-        try {
-          // Check if the instance has a "Theme" property
-          const componentProperties = node.componentProperties
-          if (componentProperties && 'Theme' in componentProperties) {
-            const themeProperty = componentProperties['Theme']
-            if (themeProperty && themeProperty.type === 'VARIANT') {
-              // Check if the instance already has the desired theme
-              if (themeProperty.value === theme) {
-                console.log('Instance already has the desired theme:', node.name)
-                skippedCount++
-              } else {
-                // Try to update the theme property
-                try {
-                  console.log('Updating theme for node:', node.name)
-                  try {
-                    node.setProperties({ Theme: theme })
-                    updatedCount++
-                  } catch (error: any) {
-                    // Check if the error is related to cycles
-                    if (error.message && error.message.includes('cycle')) {
-                      console.log('Cycle error detected when updating theme for:', node.name, '- Skipping this instance')
-                      circularInstances.push({
-                        name: node.name,
-                        id: node.id
-                      })
-                    } else {
-                      console.error('Error updating theme for node:', node.name, error)
+      // Check for main component to detect circular references
+      try {
+        const mainComponent = await node.getMainComponentAsync();
+        if (mainComponent) {
+          console.log('Main component:', mainComponent.name);
+          
+          // Check if this instance is part of its own main component
+          const isCircular = await hasCircularReference(node);
+          if (isCircular) {
+            console.error('Skipping theme detection for circular instance:', node.name);
+            circularInstances.push({
+              name: node.name,
+              id: node.id
+            });
+            return; // Skip this instance to avoid issues
+          }
+        }
+      } catch (error) {
+        console.log('Error getting main component:', error);
+      }
+      
+      try {
+        // Check if the instance has a "Theme" property
+        const componentProperties = node.componentProperties;
+        
+        if (componentProperties && 'Theme' in componentProperties) {
+          const themeProperty = componentProperties['Theme'];
+          
+          if (themeProperty && themeProperty.type === 'VARIANT') {
+            // Get the current theme value
+            if (themeProperty.value && typeof themeProperty.value === 'string') {
+              // themes.add(themeProperty.value);
+            }
+            
+            // Try to get other possible values by checking other instances
+            try {
+              const mainComponent = await node.getMainComponentAsync();
+              if (mainComponent) {
+                // Method 1: Using variantProperties
+                if (mainComponent.variantProperties) {
+                  if ('Theme' in mainComponent.variantProperties) {
+                    const themeValues = mainComponent.variantProperties['Theme'];
+                    if (Array.isArray(themeValues)) {
+                      themeValues.forEach((value: string) => {
+                        // themes.add(value);
+                      });
                     }
-                    skippedCount++
                   }
-                } catch (error) {
-                  console.error('Error updating theme for node:', node.name, error)
-                  skippedCount++
                 }
               }
+            } catch (error) {
+              console.log('Error getting theme values:', error);
             }
           }
-        } catch (error) {
-          console.error('Error processing instance for theme update:', error)
         }
+      } catch (error) {
+        console.log('Error checking component properties:', error);
       }
     }
     
-    // Always traverse children, even for instances
+    // Recursively process children
     if ('children' in node) {
       for (const child of node.children) {
-        traverseNode(child)
+        await traverseNode(child);
       }
     }
   }
   
-  // Traverse all selected nodes
-  figma.currentPage.selection.forEach(node => traverseNode(node))
+  // Start traversing from the selected nodes
+  for (const node of figma.currentPage.selection) {
+    await traverseNode(node);
+  }
   
   // Send final progress update
   figma.ui.postMessage({
@@ -427,7 +464,7 @@ function applyThemeToSelection(theme: string): { updatedCount: number, skippedCo
 }
 
 // Function to apply the selected theme to all component instances in the selection (Command Mode - No UI)
-function applyThemeToSelectionCommand(theme: string): { updatedCount: number, skippedCount: number, circularInstances: CircularInstance[], checkedLayersCount: number } {
+async function applyThemeToSelectionCommand(theme: string): Promise<{ updatedCount: number, skippedCount: number, circularInstances: CircularInstance[], checkedLayersCount: number }> {
   let updatedCount = 0
   let skippedCount = 0
   let checkedLayersCount = 0
@@ -453,66 +490,65 @@ function applyThemeToSelectionCommand(theme: string): { updatedCount: number, sk
   console.log('Estimated total nodes to process:', totalNodesToProcess)
   
   // Recursive function to traverse nodes
-  function traverseNodeCommand(node: SceneNode) {
-    // Count each node we check
-    checkedLayersCount++
+  async function traverseNodeCommand(node: SceneNode) {
+    checkedLayersCount++;
     
     // Log the layer name
-    console.log('Checking layer:', node.name, 'Type:', node.type)
+    console.log('Checking layer:', node.name, 'Type:', node.type);
     
     if (node.type === 'INSTANCE') {
-      instanceCount++
-      console.log('Checking instance for update:', node.name)
+      instanceCount++;
+      console.log('Checking instance for update:', node.name);
       
       // Skip instances that are part of their own main component
-      if (hasCircularReference(node)) {
-        console.error('Skipping update for circular instance:', node.name)
+      if (await hasCircularReference(node)) {
+        console.error('Skipping update for circular instance:', node.name);
         circularInstances.push({
           name: node.name,
           id: node.id
-        })
-        console.log('Added circular instance to list:', node.name, 'Total:', circularInstances.length)
-        skippedCount++
+        });
+        console.log('Added circular instance to list:', node.name, 'Total:', circularInstances.length);
+        skippedCount++;
       } else {
         try {
           // Check if the instance has a "Theme" property
-          const componentProperties = node.componentProperties
+          const componentProperties = node.componentProperties;
           if (componentProperties && 'Theme' in componentProperties) {
-            const themeProperty = componentProperties['Theme']
+            const themeProperty = componentProperties['Theme'];
             if (themeProperty && themeProperty.type === 'VARIANT') {
               // Check if the instance already has the desired theme
               if (themeProperty.value === theme) {
-                console.log('Instance already has the desired theme:', node.name)
-                skippedCount++
+                console.log('Instance already has the desired theme:', node.name);
+                skippedCount++;
               } else {
                 // Try to update the theme property
                 try {
-                  console.log('Updating theme for node:', node.name)
+                  console.log('Updating theme for node:', node.name);
                   try {
-                    node.setProperties({ Theme: theme })
-                    updatedCount++
+                    node.setProperties({ Theme: theme });
+                    updatedCount++;
                   } catch (error: any) {
                     // Check if the error is related to cycles
                     if (error.message && error.message.includes('cycle')) {
-                      console.log('Cycle error detected when updating theme for:', node.name, '- Skipping this instance')
+                      console.log('Cycle error detected when updating theme for:', node.name, '- Skipping this instance');
                       circularInstances.push({
                         name: node.name,
                         id: node.id
-                      })
+                      });
                     } else {
-                      console.error('Error updating theme for node:', node.name, error)
+                      console.error('Error updating theme for node:', node.name, error);
                     }
-                    skippedCount++
+                    skippedCount++;
                   }
                 } catch (error) {
-                  console.error('Error updating theme for node:', node.name, error)
-                  skippedCount++
+                  console.error('Error updating theme for node:', node.name, error);
+                  skippedCount++;
                 }
               }
             }
           }
         } catch (error) {
-          console.error('Error processing instance for theme update:', error)
+          console.error('Error processing instance for theme update:', error);
         }
       }
     }
@@ -520,13 +556,15 @@ function applyThemeToSelectionCommand(theme: string): { updatedCount: number, sk
     // Always traverse children, even for instances
     if ('children' in node) {
       for (const child of node.children) {
-        traverseNodeCommand(child)
+        await traverseNodeCommand(child);
       }
     }
   }
   
-  // Traverse all selected nodes
-  figma.currentPage.selection.forEach(node => traverseNodeCommand(node))
+  // Start traversing from the selected nodes
+  for (const node of figma.currentPage.selection) {
+    await traverseNodeCommand(node);
+  }
   
   console.log('Final circular instances count:', circularInstances.length)
   console.log('Circular instances:', circularInstances)
