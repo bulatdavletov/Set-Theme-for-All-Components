@@ -1,5 +1,12 @@
 # Figma Theme Setter Plugin
 
+## Repository Management
+- Reset main branch to commit 6e1c5974074532dfda3476f0553d053b3f9493af (2023-10-15)
+  - This commit contains the refactored theme application logic with async operations
+  - Includes improved circular reference detection and refined theme loading process
+  - All subsequent commits have been discarded
+  - This commit is now the HEAD of the main branch
+
 ## TODO
 - ✅ Ignore if instance already had desired theme. Show in the results skipped.
 - ✅ Don't show 0 with succes messages.
