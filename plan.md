@@ -17,6 +17,9 @@
 - ✅ Fix nested instances: Check and update instances inside other instances
 - ✅ Suppress circular reference errors and simplify notifications
 - Add command to show UI, because now there is no way to do it.
+- ✅ Update manifest.json with required fields for publishing:
+    - ✅ Added "networkAccess" with "allowedDomains": ["none"]
+    - ✅ Added "documentAccess": "dynamic-page"
 
 ## Description
 This plugin allows users to quickly set a theme for all component instances within a selection. The plugin provides a segmented control interface where users can select a theme, and upon confirmation, the plugin will update the "Theme" property for all component instances found within the selection.

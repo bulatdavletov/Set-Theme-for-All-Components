@@ -8,5 +8,9 @@
   "menu": [
     {"name": "Apply Dark Theme to All", "command": "apply-dark-theme"},
     {"name": "Apply Light Theme to All", "command": "apply-light-theme"}
-  ]
+  ],
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  },
+  "documentAccess": "dynamic-page"
 }
