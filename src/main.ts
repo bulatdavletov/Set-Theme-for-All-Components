@@ -131,9 +131,9 @@ export default async function () {
   // Handle commands
   figma.on('run', async ({ command }) => {
     if (command === 'apply-dark-theme') {
-      console.log('Running command: Apply Dark Theme to All');
+      console.log('Running command: Set Dark Theme to All');
       
-      // Apply Dark theme to all component instances in the selection
+      // Set Dark Theme to All component instances in the selection
       const result = await applyThemeToSelectionCommand('Dark');
       
       // Show notification with results
@@ -146,9 +146,9 @@ export default async function () {
       // Close the plugin
       figma.closePlugin();
     } else if (command === 'apply-light-theme') {
-      console.log('Running command: Apply Light Theme to All');
+      console.log('Running command: Set Light Theme to All');
       
-      // Apply Light theme to all component instances in the selection
+      // Set Light Theme to All component instances in the selection
       const result = await applyThemeToSelectionCommand('Light');
       
       // Show notification with results

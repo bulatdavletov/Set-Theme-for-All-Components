@@ -128,7 +128,7 @@ async function main_default() {
   };
   figma.on("run", async ({ command }) => {
     if (command === "apply-dark-theme") {
-      console.log("Running command: Apply Dark Theme to All");
+      console.log("Running command: Set Dark Theme to All");
       const result = await applyThemeToSelectionCommand("Dark");
       if (result.updatedCount > 0) {
         figma.notify(`\u2705 Updated ${result.updatedCount}/${result.updatedCount + result.skippedCount}`, { timeout: 3e3 });
@@ -137,7 +137,7 @@ async function main_default() {
       }
       figma.closePlugin();
     } else if (command === "apply-light-theme") {
-      console.log("Running command: Apply Light Theme to All");
+      console.log("Running command: Set Light Theme to All");
       const result = await applyThemeToSelectionCommand("Light");
       if (result.updatedCount > 0) {
         figma.notify(`\u2705 Updated ${result.updatedCount}/${result.updatedCount + result.skippedCount}`, { timeout: 3e3 });

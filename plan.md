@@ -32,8 +32,8 @@
 - [x] Remove "Selected: N" text from UI
 - [x] Don't show skipped count. Show Applied count. If zero, tell something nice
 - [x] No ui version, with Figma native actions. Use notifications for feedback.
-    - [x] Apply Dark Theme to All
-    - [x] Apply Light Theme to All
+    - [x] Set Dark Theme to All
+    - [x] Set Light Theme to All
 - [x] Fix nested instances: Check and update instances inside other instances
 - [x] Suppress circular reference errors and simplify notifications
 - Add command to show UI, because now there is no way to do it.
@@ -150,8 +150,8 @@ The plugin has been successfully implemented and debugged. All core functionalit
 - Uses only hardcoded Light and Dark themes instead of searching for available themes
 - Shows the total number of checked layers in both the main view and results screen
 - Added menu commands for direct theme application without UI:
-  - "Apply Dark Theme to All" command applies Dark theme to all components with notifications for feedback
-  - "Apply Light Theme to All" command applies Light theme to all components with notifications for feedback
+  - "Set Dark Theme to All" command applies Dark theme to all components with notifications for feedback
+  - "Set Light Theme to All" command applies Light theme to all components with notifications for feedback
   - Both commands show the number of components updated and layers checked
   - Both commands notify about any skipped components with circular references
   - Commands operate in a UI-less mode, communicating exclusively through Figma notifications
@@ -274,7 +274,7 @@ The plugin follows a systematic approach to apply themes to component instances:
 
 1. **Initialization**:
    - The plugin can be launched in two ways:
-     - Via menu commands ("Apply Dark Theme to All" or "Apply Light Theme to All")
+     - Via menu commands ("Set Dark Theme to All" or "Set Light Theme to All")
      - Via the normal plugin interface with UI
    - In command mode, it directly applies the specified theme without showing UI
    - In UI mode, it shows a segmented control for theme selection
