@@ -4,7 +4,7 @@
   "description": "Set Theme for All Components",
   "main": "dist/code.js",
   "scripts": {
-    "build": "build-figma-plugin --typecheck --minify",
+    "build": "build-figma-plugin --typecheck --minify && cp manifest.template.json manifest.json",
     "watch": "build-figma-plugin --typecheck --watch",
     "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
     "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix ."

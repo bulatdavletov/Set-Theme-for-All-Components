@@ -57,11 +57,18 @@ npm run build
 npm run watch
 ```
 
+**Manifest Generation**
+
+The plugin uses `manifest.template.json` as the source of truth for configuration.  
+After each build (`npm run build`), `manifest.json` is automatically regenerated from `manifest.template.json`.  
+**Edit only `manifest.template.json`** to make changes to your plugin manifest.
+
 ### Project Structure
 
 - `src/main.ts`: Contains the main plugin code that runs in the Figma context
 - `src/ui.tsx`: Contains the UI code for the plugin
-- `manifest.json`: Plugin configuration
+- `manifest.template.json`: Source of truth for plugin configuration.
+- `manifest.json`: Generated automatically from `manifest.template.json` after each build.
 
 ## Current Status
 
